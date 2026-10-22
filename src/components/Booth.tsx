@@ -6,7 +6,7 @@ import { PHOTO_RECTS, composeStory, composeStrip, encode, encodeJpeg, preloadAss
 import { gainFor, ghostOf, grabPhoto, sampleLuminance } from "@/lib/booth/photo";
 import { DEFAULT_HOST, deviceId, loadHost, saveHost, type HostSettings } from "@/lib/booth/settings";
 import * as sound from "@/lib/booth/sound";
-import Scenery, { SceneryDefs } from "./Scenery";
+import Collage from "./Collage";
 import { useParallax } from "./useParallax";
 
 type Screen = "attract" | "waking" | "denied" | "frame" | "capture" | "review" | "print";
@@ -60,23 +60,20 @@ function SealButton({
   );
 }
 
-function FrameCorners() {
+/**
+ * A card of aged paper clipped over scraps of ticking and gingham fabric, with foil stars,
+ * like a page from a vintage album. Readable content sits on these.
+ */
+function Card({ children, className }: { children: React.ReactNode; className: string }) {
   return (
-    <>
-      {[0, 90, 180, 270].map((deg) => (
-        <img key={deg} className={`corner c${deg}`} src="/kit/frame-corner.svg" alt="" aria-hidden="true" />
-      ))}
-    </>
-  );
-}
-
-/** A die-cut scrapbook sticker, optionally held on with a strip of washi tape. */
-function Sticker({ src, className, tape }: { src: string; className: string; tape?: "rose" | "gold" | "ink" }) {
-  return (
-    <span className={`taped ${className}`} aria-hidden="true">
-      <img className="sticker" src={src} alt="" />
-      {tape && <i className={`tape ${tape}`} />}
-    </span>
+    <div className={`card ${className}`}>
+      <i className="fabric ticking" aria-hidden="true" />
+      <i className="fabric gingham" aria-hidden="true" />
+      <div className="panel">{children}</div>
+      <img className="clip" src="/decor/paperclip.svg" alt="" aria-hidden="true" />
+      <img className="foil f1 sticker" src="/decor/star-gold.svg" alt="" aria-hidden="true" />
+      <img className="foil f2 sticker" src="/decor/star-gold.svg" alt="" aria-hidden="true" />
+    </div>
   );
 }
 
@@ -533,32 +530,24 @@ export default function Booth() {
 
   return (
     <div ref={rootRef} className={`booth${reduced ? " reduced" : ""}`}>
-      <SceneryDefs />
-      <Scenery variant={screen === "attract" || screen === "waking" ? "full" : "page"} />
+      <Collage variant={screen === "attract" || screen === "waking" ? "full" : "page"} />
       {(screen === "attract" || screen === "waking") && (
-        <section className="screen attract" aria-label="Cover">
+        <section className={`screen attract${screen === "waking" ? " flashing" : ""}`} aria-label="Cover">
           <Dust />
           <header className="poster-top">
             <span>{host.presenter}</span>
             <i className="rule" aria-hidden="true" />
             <span>{host.subtitle}</span>
           </header>
-          <Sticker src="/decor/skeleton-lady.svg" className="fig lady" />
-          <Sticker src="/decor/skeleton-gent.svg" className="fig gent" />
-          <Sticker src="/decor/candelabra.svg" className="fig candelabra" />
-          <Sticker src="/decor/gramophone.svg" className="fig gramophone" />
-          <div className={`door-wrap${screen === "waking" ? " opening" : ""}`} aria-hidden="true">
-            <span className="door-glow" />
-            <img className="door" src="/decor/door.svg" alt="" />
-            <Sticker src="/decor/talisman-yellow.svg" className="tal t1" tape="ink" />
-            <Sticker src="/decor/talisman-white.svg" className="tal t2" tape="rose" />
-            <Sticker src="/decor/talisman-red.svg" className="tal t3" tape="gold" />
-            <Sticker src="/decor/talisman-yellow.svg" className="tal t4" tape="rose" />
-            <Sticker src="/decor/talisman-white.svg" className="tal t5" tape="ink" />
-            <Sticker src="/decor/talisman-red.svg" className="tal t6" />
-            <Sticker src="/decor/skull.svg" className="door-skull" tape="gold" />
-            <Sticker src="/decor/witch-hat.svg" className="door-hat" tape="rose" />
-            <img className="door-web" src="/decor/web.svg" alt="" />
+          <div className="hero" aria-hidden="true">
+            <div className="hero-film">
+              <i className="pic door" />
+              <i />
+              <i />
+              <i />
+            </div>
+            <img className="hero-camera sticker" src="/decor/camera.svg" alt="" />
+            <span className="hero-flash" />
           </div>
           <h1 className="poster-title">
             {host.eventName.split(/\s+/).map((w, i) => (
@@ -581,9 +570,9 @@ export default function Booth() {
           </dl>
           <div className="poster-cta">
             <SealButton onClick={openBook} disabled={screen === "waking"}>
-              {screen === "waking" ? "The door creaks open…" : "Open the door"}
+              {screen === "waking" ? "Loading the film…" : "Step inside"}
             </SealButton>
-            <p className="see-you">See you in costume</p>
+            <p className="see-you">see you in costume</p>
           </div>
           <p className="privacy">Photos are kept for 48 hours so you can download them, then deleted.</p>
         </section>
@@ -591,39 +580,33 @@ export default function Booth() {
 
       {screen === "denied" && (
         <section className="screen page denied" aria-label="Camera needed">
-          <div className="panel denied-panel">
-            <img src="/kit/moth.svg" alt="" className="denied-moth" />
+          <Card className="denied-card">
             <p className="kicker">An interruption</p>
             <h1 className="page-title">The camera is still asleep</h1>
-            <p className="lede">This book needs the camera to draw your portrait. Nothing is recorded until you press Begin.</p>
+            <p className="lede">This booth needs the camera to take your portrait. Nothing is recorded until you press Begin.</p>
             <ol className="howto">
               <li><b>Chrome or Edge:</b> click the camera icon at the right end of the address bar, choose <i>Always allow</i>, then try again.</li>
               <li><b>Safari:</b> Safari menu → Settings for This Website → Camera → <i>Allow</i>.</li>
               <li><b>macOS:</b> System Settings → Privacy &amp; Security → Camera → turn on your browser.</li>
             </ol>
             <SealButton onClick={openBook}>Try again</SealButton>
-          </div>
+          </Card>
         </section>
       )}
 
       {showCamera && (
         <section className="screen page camera" aria-label={screen === "frame" ? "Frame your portrait" : "Taking photos"}>
           <header className="page-head">
-            <p className="kicker">{screen === "frame" ? "Chapter one · Gather close" : `Page ${shotIndex + 1} of 3`}</p>
-            <h1 className="page-title">
-              {screen === "frame" ? (
-                <>Step into the <em>portrait</em></>
-              ) : countdown ? (
-                "Hold still…"
-              ) : (
-                <>Pinned to the <em>page</em></>
-              )}
-            </h1>
+            <p className="kicker">{screen === "frame" ? "Roll one · Gather close" : `Frame ${shotIndex + 1} of 3`}</p>
+            <h1 className="page-title">{screen === "frame" ? "Step into the frame" : countdown ? "Hold still…" : "Got it!"}</h1>
           </header>
 
-          <div className="gilt">
-            <FrameCorners />
-            <img className="gilt-web" src="/decor/web.svg" alt="" aria-hidden="true" />
+          <div className="filmframe">
+            <span className="edge top" aria-hidden="true">
+              <b>{shotIndex + 12}</b>
+              <b>▶ {shotIndex + 12}A</b>
+              <b>SUM 400</b>
+            </span>
             <div className="mat">
               <video ref={attachVideo} className="live" style={previewStyle} playsInline muted autoPlay />
               <div className="guide" aria-hidden="true">
@@ -635,10 +618,13 @@ export default function Booth() {
                 </div>
               )}
             </div>
+            <span className="edge bottom" aria-hidden="true">
+              <b>HALLOWEEN 2026</b>
+              <b>{shotIndex + 13}</b>
+            </span>
           </div>
 
-          <aside className="side panel">
-            <Sticker src="/decor/skull.svg" className="panel-skull" tape="ink" />
+          <Card className="side">
             {screen === "frame" ? (
               <>
                 <div className="ready-note">
@@ -658,13 +644,12 @@ export default function Booth() {
               <ol className="slots" aria-label="Captured photos">
                 {[0, 1, 2].map((i) => (
                   <li key={i} className={`slot-photo${shots[i] ? " pinned" : ""}${i === shotIndex && !shots[i] ? " next" : ""}`}>
-                    {shots[i] ? <img src={shots[i]} alt={`Photo ${i + 1}`} /> : <span>Page {i + 1}</span>}
-                    <b className="pc tl" /><b className="pc tr" /><b className="pc bl" /><b className="pc br" />
+                    {shots[i] ? <img src={shots[i]} alt={`Photo ${i + 1}`} /> : <span>{i + 1}</span>}
                   </li>
                 ))}
               </ol>
             )}
-          </aside>
+          </Card>
         </section>
       )}
 
@@ -672,22 +657,17 @@ export default function Booth() {
         <section className="screen page review" aria-label="Review your strip">
           <div className="draft">
             {strip ? (
-              <img src={strip.url} alt="Your three photos laid out as a strip" />
+              <img src={strip.url} alt="Your three photos laid out as a film strip" />
             ) : (
               <div className="binding">
                 <Quill />
-                <span>Binding the pages…</span>
+                <span>Developing the film…</span>
               </div>
             )}
           </div>
-          <Sticker src="/decor/talisman-red.svg" className="tal review-tal" tape="gold" />
-          <Sticker src="/decor/skeleton-gent.svg" className="fig review-gent" />
-          <div className="review-copy panel">
-            <Sticker src="/decor/skull.svg" className="panel-skull" tape="rose" />
-            <p className="kicker">Chapter two · The proof</p>
-            <h1 className="page-title">
-              Is this your <em>tale?</em>
-            </h1>
+          <Card className="review-copy">
+            <p className="kicker">Roll two · The proof</p>
+            <h1 className="page-title">Is this your tale?</h1>
             <img className="pumpkin" src="/kit/pumpkin.svg" alt="" />
             <div className="review-actions">
               <SealButton onClick={print} disabled={!strip}>
@@ -700,21 +680,20 @@ export default function Booth() {
             <p className="hint">
               Space to print{retakesLeft > 0 ? " · R to retake" : ""}. The press starts on its own after 30 seconds.
             </p>
-          </div>
+          </Card>
         </section>
       )}
 
       {screen === "print" && strip && (
         <section className={`screen page print${ready ? " ready" : ""}`} aria-label="Your strip">
           <div className="print-left">
-            <div className="candle-row" aria-hidden="true">
-              <Sticker src="/decor/candelabra.svg" className="print-candelabra" />
-              <Sticker src="/decor/skull.svg" className="print-skull" tape="gold" />
+            <div className="print-props" aria-hidden="true">
+              <img className="sticker print-camera" src="/decor/camera.svg" alt="" />
+              <img className="sticker print-clock" src="/decor/clock.svg" alt="" />
             </div>
             <div className="caption" aria-live="polite">
               {ready && (
-                <div className="panel caption-panel">
-                  <Sticker src="/decor/witch-hat.svg" className="caption-hat" tape="rose" />
+                <Card className="caption-card">
                   <p className="caption-text">
                     Scan to keep your story.
                     <br />
@@ -724,18 +703,16 @@ export default function Booth() {
                     <SealButton onClick={() => setLightbox(true)} variant="quiet">
                       View up close
                     </SealButton>
-                    <SealButton onClick={resetSession}>
-                      Start a new story
-                    </SealButton>
+                    <SealButton onClick={resetSession}>Start a new story</SealButton>
                   </div>
-                </div>
+                </Card>
               )}
             </div>
           </div>
 
           <div className="press">
             <p className="sign">
-              <span className="sign-text">Your tale is being printed</span>
+              <span className="sign-text">Developing your film</span>
               <span className="arrow" aria-hidden="true">↓</span>
             </p>
             <div className="slot" aria-hidden="true" />
@@ -765,14 +742,10 @@ export default function Booth() {
 
           <div className="tag-col">
             <div className="tag">
-              <span className="twine" aria-hidden="true" />
-              <img className="tag-art" src="/kit/gift-tag-blank.svg" alt="" />
-              <div className="tag-body">
+              <i className="mtape" aria-hidden="true" />
+              <div className="tag-pic">
                 {upload.status === "done" ? (
-                  <>
-                    <div className="qr" role="img" aria-label="QR code to download your strip" dangerouslySetInnerHTML={{ __html: upload.qrSvg }} />
-                    <p className="tag-url">{shortUrl(upload.url)}</p>
-                  </>
+                  <div className="qr" role="img" aria-label="QR code to download your strip" dangerouslySetInnerHTML={{ __html: upload.qrSvg }} />
                 ) : upload.status === "error" ? (
                   <div className="qr waiting">
                     <p className="tag-wait">The press refused this one.</p>
@@ -791,9 +764,10 @@ export default function Booth() {
                     )}
                   </div>
                 )}
-                <p className="tag-scan">Scan to keep<br />your story</p>
-                <p className="tag-fades">Fades in 48 hours</p>
               </div>
+              <p className="tag-scan">scan to keep your story ♡</p>
+              {upload.status === "done" && <p className="tag-url">{shortUrl(upload.url)}</p>}
+              <p className="tag-fades">Fades in 48 hours</p>
             </div>
           </div>
         </section>

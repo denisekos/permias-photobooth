@@ -4,7 +4,9 @@ A laptop photobooth that takes 3 photos, prints them as a storybook strip with a
 
 ## Look
 
-The booth follows the Permias NYC party poster, built as a scrapbook. A dark plaster wall glows red. Paper-cut valances and columns are cut from dark wood and burnt paper, hung with iron chains, tattered red cloth, cobwebs, talismans, skulls, red lanterns and a blood moon. Bats flap and a witch crosses the sky. The cover is the poster: presenter and Halloween labels, a haunted door with taped paper talismans and a bony hand gripping its edge, the title in Metal Mania, the date, time and venue, and an "Open the door" button. Skeleton lady and gentleman stickers flank the door. Readable content sits on torn, yellowed paper cards. The printed strip and story image use the same style. Scenery lives in `src/components/Scenery.tsx` and illustrations in `public/decor/`. `npm run gen:scenery` renders the scenery for the phone pages and runs before `dev` and `build`.
+A vintage photo album with a Halloween edge. The backdrop is a black album page scattered with ephemera: a vintage camera, a record, a cassette, a clock stuck at midnight, red bows, foil stars, a ticket, a matchbox and a disco ball, plus polaroids of the haunted door and of "mr. & mrs. bones", skulls, pumpkins, bats and a witch flying past. Every photo frame is 35mm film. The live preview sits in a film frame, the captured photos fill a short length of film, and the printed strip is a film strip with a title card, the three photos and a details card, stickers on its rails. The QR comes taped into a polaroid. The party poster's red title lettering and details stay. Readable text sits on aged paper clipped over ticking and gingham fabric.
+
+The collage lives in `src/components/Collage.tsx` and the illustrations in `public/decor/`. `npm run gen:scenery` renders the collage for the phone pages and runs before `dev` and `build`.
 
 Poster details (presenter, date, day, time, doors, venue, city) are editable in host settings (Shift+H).
 
@@ -49,7 +51,7 @@ No database is needed: each strip's record is a small JSON object stored next to
 | `GET /api/strips/:id/image` → 10-minute signed URL, counts downloads | `src/app/api/strips/[id]/image/route.ts` |
 | Hourly cleanup | `src/app/api/cron/cleanup/route.ts` |
 | Synthesized sounds (muted by default) | `src/lib/booth/sound.ts` |
-| Paper-cut scenery, balloons, hanging ornaments | `src/components/Scenery.tsx`, `public/decor/` |
+| Album collage and stickers | `src/components/Collage.tsx`, `public/decor/` |
 
 P1 items included: host event details, story-format image, Web Share, sound. Photos are taken in natural colour (the filter and chapter pickers were removed), each after a 5-second countdown.
 

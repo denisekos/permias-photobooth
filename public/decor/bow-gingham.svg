@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 170"><defs><pattern id="ging" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(18)"><rect width="12" height="12" fill="#f4ece0"/><rect width="6" height="12" fill="#c4161c" opacity=".55"/><rect width="12" height="6" fill="#c4161c" opacity=".55"/></pattern></defs><path d="M100 62 C70 20 18 18 14 50 C10 80 60 86 100 70 Z" fill="url(#ging)" stroke="#1B1A1F" stroke-width="1.6"/>
+<path d="M100 62 C130 20 182 18 186 50 C190 80 140 86 100 70 Z" fill="url(#ging)" stroke="#1B1A1F" stroke-width="1.6"/>
+<path d="M40 44 C60 42 80 52 96 64" fill="none" stroke="#000" stroke-width="5" opacity=".18"/><path d="M160 44 C140 42 120 52 104 64" fill="none" stroke="#000" stroke-width="5" opacity=".18"/>
+<path d="M92 72 C78 100 62 128 40 150 L56 146 L60 162 C80 136 94 106 100 76 Z" fill="url(#ging)" stroke="#1B1A1F" stroke-width="1.6"/>
+<path d="M108 72 C122 100 138 128 160 150 L144 146 L140 162 C120 136 106 106 100 76 Z" fill="url(#ging)" stroke="#1B1A1F" stroke-width="1.6"/>
+<rect x="86" y="54" width="28" height="24" rx="8" fill="url(#ging)" stroke="#1B1A1F" stroke-width="1.6"/><rect x="86" y="54" width="28" height="24" rx="8" fill="#000" opacity=".15"/>
+<path d="M30 40 C36 30 52 28 64 34" fill="none" stroke="#fff" stroke-width="2" opacity=".35"/></svg>

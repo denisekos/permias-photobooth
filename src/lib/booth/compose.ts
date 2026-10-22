@@ -1,29 +1,42 @@
-import { PHOTO_H, PHOTO_W } from "./photo";
 import type { HostSettings } from "./settings";
 
+/*
+ * The strip is a length of 35mm film: sprocket rails down both sides, a cream title card
+ * in the first frame, the three photos, and the party details in the last frame. Vintage
+ * stickers sit on the rails and the gaps between frames, never over faces.
+ */
 export const STRIP_W = 1200;
 export const STRIP_H = 3600;
-const M = 60;
-const HEADER_H = 380;
-const GAP = 40;
-export const PHOTO_Y = [0, 1, 2].map((i) => M + HEADER_H + i * (PHOTO_H + GAP));
-const FOOTER_Y = M + HEADER_H + 3 * PHOTO_H + 2 * GAP;
+const RAIL = 120;
+const FRAME_W = STRIP_W - 2 * RAIL;
+const SLOT_H = 720;
+const GAP = 28;
+const LEAD = 36;
+const CARD_H = (STRIP_H - 2 * LEAD - 3 * SLOT_H - 4 * GAP) / 2;
+const TITLE_Y = LEAD;
+export const PHOTO_Y = [0, 1, 2].map((i) => LEAD + CARD_H + GAP + i * (SLOT_H + GAP));
+const FOOTER_Y = PHOTO_Y[2] + SLOT_H + GAP;
 
 /** Photo rectangles as fractions of the strip, for the develop overlay. */
 export const PHOTO_RECTS = PHOTO_Y.map((y) => ({
-  left: M / STRIP_W,
+  left: RAIL / STRIP_W,
   top: y / STRIP_H,
-  width: PHOTO_W / STRIP_W,
-  height: PHOTO_H / STRIP_H,
+  width: FRAME_W / STRIP_W,
+  height: SLOT_H / STRIP_H,
 }));
 
-const BONE = "#E8DCC4";
+const FILM = "#141110";
+const HOLE = "#EDE6D6";
+const CARD = "#EDE3CC";
+const EDGE_INK = "#E3A33B";
+const INK = "#1B1A1F";
 const BLOOD = "#C4161C";
 const BLOOD_DK = "#7A1014";
 
 const SERIF = '"Cormorant Garamond", "IM Fell English", Georgia, serif';
 const DISPLAY = '"Metal Mania", "Cormorant Garamond", serif';
 const LABEL = '"Oswald", "Arial Narrow", sans-serif';
+const HAND = '"Homemade Apple", "Bradley Hand", cursive';
 
 const images = new Map<string, Promise<HTMLImageElement>>();
 export function loadImage(src: string): Promise<HTMLImageElement> {
@@ -44,16 +57,16 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   return p;
 }
 
+const STICKERS = ["star-gold", "star-silver", "clock", "cassette", "skull", "bat", "bow-velvet", "web", "camera", "disco-ball", "ticket"];
+
 export async function preloadAssets() {
   await Promise.all([
-    ...["parchment-texture.png", "wax-seal-blank.svg"].map((f) => loadImage(`/kit/${f}`)),
-    ...["talisman-yellow.svg", "talisman-white.svg", "talisman-red.svg", "skull.svg", "web.svg"].map((f) =>
-      loadImage(`/decor/${f}`),
-    ),
+    ...["parchment-texture.png", "wax-seal-blank.svg", "pumpkin.svg"].map((f) => loadImage(`/kit/${f}`)),
+    ...STICKERS.map((f) => loadImage(`/decor/${f}.svg`)),
     document.fonts?.load(`500 26px ${SERIF}`),
-    document.fonts?.load(`italic 500 40px ${SERIF}`),
     document.fonts?.load(`100px ${DISPLAY}`),
     document.fonts?.load(`500 30px ${LABEL}`),
+    document.fonts?.load(`30px ${HAND}`),
   ]).catch(() => {});
 }
 
@@ -83,96 +96,151 @@ function fitFont(ctx: CanvasRenderingContext2D, text: string, font: (px: number)
   while (px > 24 && ctx.measureText(text).width > maxW) ctx.font = font((px -= 2));
 }
 
-function paperBackground(ctx: CanvasRenderingContext2D, paper: HTMLImageElement, w: number, h: number) {
-  const scale = w / paper.width;
-  const tileH = paper.height * scale;
-  for (let y = 0, i = 0; y < h; y += tileH, i++) {
-    ctx.save();
-    if (i % 2) {
-      ctx.translate(0, y + tileH);
-      ctx.scale(1, -1);
-      ctx.drawImage(paper, 0, 0, w, tileH);
-    } else {
-      ctx.drawImage(paper, 0, y, w, tileH);
-    }
-    ctx.restore();
-  }
-}
-
-function deckledPath(ctx: CanvasRenderingContext2D, w: number, h: number, inset: number, seed: number) {
-  const r = rng(seed);
-  const jag = () => inset + (r() - 0.5) * inset * 1.1;
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
-  ctx.moveTo(jag(), jag());
-  for (let x = 0; x <= w; x += 9 + r() * 10) ctx.lineTo(x, jag());
-  for (let y = 0; y <= h; y += 9 + r() * 10) ctx.lineTo(w - jag(), y);
-  for (let x = w; x >= 0; x -= 9 + r() * 10) ctx.lineTo(x, h - jag());
-  for (let y = h; y >= 0; y -= 9 + r() * 10) ctx.lineTo(jag(), y);
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
 }
 
-function edgeBurn(ctx: CanvasRenderingContext2D, w: number, h: number, depth: number, alpha: number, rgb = "110, 80, 40") {
-  const edges: [number, number, number, number, number, number, number, number][] = [
-    [0, 0, 0, depth, 0, 0, w, depth],
-    [0, h, 0, h - depth, 0, h - depth, w, depth],
-    [0, 0, depth, 0, 0, 0, depth, h],
-    [w, 0, w - depth, 0, w - depth, 0, depth, h],
-  ];
-  for (const [x0, y0, x1, y1, rx, ry, rw, rh] of edges) {
-    const g = ctx.createLinearGradient(x0, y0, x1, y1);
-    g.addColorStop(0, `rgba(${rgb}, ${alpha})`);
-    g.addColorStop(1, `rgba(${rgb}, 0)`);
-    ctx.fillStyle = g;
-    ctx.fillRect(rx, ry, rw, rh);
+/** Aged cream paper: parchment grain multiplied over cream, edges browned. */
+function agedCard(ctx: CanvasRenderingContext2D, paper: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+  ctx.fillStyle = CARD;
+  ctx.fillRect(x, y, w, h);
+  ctx.globalCompositeOperation = "multiply";
+  ctx.globalAlpha = 0.55;
+  ctx.drawImage(paper, x, y, w, (paper.height / paper.width) * w);
+  ctx.globalCompositeOperation = "source-over";
+  ctx.globalAlpha = 1;
+  const g = ctx.createRadialGradient(x + w / 2, y + h / 2, Math.min(w, h) * 0.35, x + w / 2, y + h / 2, Math.max(w, h) * 0.75);
+  g.addColorStop(0, "rgba(90, 58, 24, 0)");
+  g.addColorStop(1, "rgba(90, 58, 24, 0.45)");
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y, w, h);
+  ctx.restore();
+}
+
+/** The film itself: rails with rounded sprocket holes, a faint sheen, scratches and edge print. */
+function film(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number) {
+  ctx.fillStyle = FILM;
+  ctx.fillRect(0, 0, w, h);
+  const sheen = ctx.createLinearGradient(0, 0, w, 0);
+  sheen.addColorStop(0, "rgba(255, 255, 255, 0.05)");
+  sheen.addColorStop(0.5, "rgba(255, 255, 255, 0)");
+  sheen.addColorStop(1, "rgba(255, 255, 255, 0.04)");
+  ctx.fillStyle = sheen;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.fillStyle = HOLE;
+  for (let y = 22; y < h - 40; y += 76) {
+    for (const x of [32, w - 32 - 56]) {
+      roundRect(ctx, x, y, 56, 42, 9);
+      ctx.fill();
+    }
+  }
+
+  const r = rng(seed);
+  ctx.strokeStyle = "rgba(237, 230, 214, 0.08)";
+  for (let i = 0; i < 26; i++) {
+    const x = r() * w;
+    ctx.lineWidth = r() * 1.6 + 0.4;
+    ctx.beginPath();
+    ctx.moveTo(x, r() * h);
+    ctx.lineTo(x + (r() - 0.5) * 8, r() * h);
+    ctx.stroke();
   }
 }
 
-function drawSeal(ctx: CanvasRenderingContext2D, seal: HTMLImageElement, cx: number, top: number, size: number) {
+/** Frame numbers and stock name printed in the margins, as on real negatives. */
+function edgePrint(ctx: CanvasRenderingContext2D, frames: number[]) {
+  ctx.fillStyle = EDGE_INK;
+  ctx.font = `600 26px ${LABEL}`;
+  ctx.textAlign = "center";
+  frames.forEach((y, i) => {
+    ctx.fillText(String(i + 1), 18, y + 40);
+    ctx.fillText(`${i + 1}A`, STRIP_W - 16, y + 40);
+    ctx.beginPath();
+    ctx.moveTo(STRIP_W - 24, y + 360);
+    ctx.lineTo(STRIP_W - 8, y + 350);
+    ctx.lineTo(STRIP_W - 8, y + 370);
+    ctx.closePath();
+    ctx.fill();
+  });
+  // stock name runs down the margin between the sprocket holes and the frames
+  ctx.save();
+  ctx.translate(RAIL - 14, STRIP_H / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.font = `500 16px ${LABEL}`;
+  ctx.globalAlpha = 0.85;
+  spaced(ctx, "SUM 400 · SAFETY FILM · HALLOWEEN 2026", 0, 6, 6);
+  ctx.restore();
+}
+
+/** An image's silhouette filled with one colour, for sticker outlines (works without ctx.filter). */
+function silhouette(img: HTMLImageElement, w: number, h: number, color: string) {
+  const c = document.createElement("canvas");
+  c.width = Math.ceil(w);
+  c.height = Math.ceil(h);
+  const x = c.getContext("2d")!;
+  x.drawImage(img, 0, 0, w, h);
+  x.globalCompositeOperation = "source-in";
+  x.fillStyle = color;
+  x.fillRect(0, 0, w, h);
+  return c;
+}
+
+/** Draws an image as a die-cut sticker with a cream outline and a soft shadow. */
+function sticker(ctx: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, cy: number, w: number, rot: number) {
+  const h = (img.height / img.width) * w;
+  const sil = silhouette(img, w, h, "#F2EADA");
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate((rot * Math.PI) / 180);
+  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+  ctx.shadowBlur = 16;
+  ctx.shadowOffsetY = 7;
+  for (const [dx, dy] of [[5, 0], [-5, 0], [0, 5], [0, -5], [4, 4], [-4, -4], [4, -4], [-4, 4]]) {
+    ctx.drawImage(sil, -w / 2 + dx, -h / 2 + dy);
+    ctx.shadowColor = "transparent";
+  }
+  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore();
+  sil.width = 0;
+}
+
+/** A strip of masking tape with torn ends. */
+function tape(ctx: CanvasRenderingContext2D, cx: number, cy: number, w: number, rot: number) {
+  const r = rng(Math.round(cx * 7 + cy));
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate((rot * Math.PI) / 180);
+  ctx.beginPath();
+  ctx.moveTo(-w / 2, -15);
+  for (let y = -15; y <= 15; y += 5) ctx.lineTo(-w / 2 + r() * 6, y);
+  ctx.lineTo(w / 2, 15);
+  for (let y = 15; y >= -15; y -= 5) ctx.lineTo(w / 2 - r() * 6, y);
+  ctx.closePath();
+  ctx.fillStyle = "rgba(226, 208, 168, 0.82)";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+  ctx.shadowBlur = 4;
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawSeal(ctx: CanvasRenderingContext2D, seal: HTMLImageElement, cx: number, cy: number, size: number) {
   const s = size / 160;
-  ctx.drawImage(seal, cx - size / 2, top, size, size);
+  ctx.drawImage(seal, cx - size / 2, cy - size / 2, size, size);
   ctx.textAlign = "center";
   ctx.font = `italic 600 ${30 * s}px ${SERIF}`;
   ctx.fillStyle = "#5E1C1C";
-  ctx.fillText("SUM", cx, top + 91 * s);
-  ctx.globalAlpha = 0.55;
-  ctx.fillStyle = "#D97A70";
-  ctx.fillText("SUM", cx - 1 * s, top + 89.5 * s);
-  ctx.globalAlpha = 1;
-}
-
-function drawPhoto(ctx: CanvasRenderingContext2D, photo: HTMLCanvasElement, x: number, y: number) {
-  ctx.drawImage(photo, x, y, PHOTO_W, PHOTO_H);
-  // dark vignette, like a flash photo in a dim hallway
-  const g = ctx.createRadialGradient(x + PHOTO_W / 2, y + PHOTO_H / 2, PHOTO_H * 0.4, x + PHOTO_W / 2, y + PHOTO_H / 2, PHOTO_W * 0.68);
-  g.addColorStop(0, "rgba(20, 6, 4, 0)");
-  g.addColorStop(1, "rgba(20, 6, 4, 0.5)");
-  ctx.fillStyle = g;
-  ctx.fillRect(x, y, PHOTO_W, PHOTO_H);
-  ctx.strokeStyle = BONE;
-  ctx.lineWidth = 5;
-  ctx.strokeRect(x + 2.5, y + 2.5, PHOTO_W - 5, PHOTO_H - 5);
-  ctx.strokeStyle = BLOOD_DK;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x - 4, y - 4, PHOTO_W + 8, PHOTO_H + 8);
-}
-
-/** Dark plaster with a red glow pooled in the middle, as on the party poster. */
-function wall(ctx: CanvasRenderingContext2D, paper: HTMLImageElement, w: number, h: number) {
-  ctx.fillStyle = "#1c120e";
-  ctx.fillRect(0, 0, w, h);
-  ctx.save();
-  ctx.globalCompositeOperation = "soft-light";
-  ctx.globalAlpha = 0.6;
-  paperBackground(ctx, paper, w, h);
-  ctx.restore();
-  for (const [cx, cy, r, a] of [[0.5, 0.35, 0.8, 0.22], [0.3, 0.7, 0.6, 0.12], [0.75, 0.15, 0.5, 0.1]] as const) {
-    const g = ctx.createRadialGradient(w * cx, h * cy, 0, w * cx, h * cy, w * r);
-    g.addColorStop(0, `rgba(160, 18, 22, ${a})`);
-    g.addColorStop(1, "rgba(160, 18, 22, 0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, w, h);
-  }
-  edgeBurn(ctx, w, h, Math.min(w, h) * 0.12, 0.75, "0, 0, 0");
+  ctx.fillText("SUM", cx, cy - size / 2 + 91 * s);
 }
 
 /** A rule with a diamond in the middle, the poster's ornament. */
@@ -192,37 +260,14 @@ function diamondRule(ctx: CanvasRenderingContext2D, cx: number, y: number, half:
   ctx.restore();
 }
 
-/** Draws an image as a die-cut sticker: bone outline, then the drawing. */
-function sticker(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, rot: number) {
-  const h = (img.height / img.width) * w;
-  ctx.save();
-  ctx.translate(x + w / 2, y + h / 2);
-  ctx.rotate((rot * Math.PI) / 180);
-  ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-  ctx.shadowBlur = 14;
-  ctx.shadowOffsetY = 6;
-  for (const [dx, dy] of [[4, 0], [-4, 0], [0, 4], [0, -4]]) {
-    ctx.filter = "brightness(0) invert(0.9) sepia(0.3)";
-    ctx.drawImage(img, -w / 2 + dx, -h / 2 + dy, w, h);
-    ctx.shadowColor = "transparent";
-  }
-  ctx.filter = "none";
-  ctx.drawImage(img, -w / 2, -h / 2, w, h);
-  ctx.restore();
-}
-
-/** Washi tape strip across a sticker's top. */
-function tape(ctx: CanvasRenderingContext2D, cx: number, cy: number, w: number, rot: number, color: string) {
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate((rot * Math.PI) / 180);
-  ctx.globalAlpha = 0.85;
-  ctx.fillStyle = color;
-  ctx.fillRect(-w / 2, -14, w, 28);
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = BONE;
-  for (let i = -w / 2; i < w / 2; i += 14) ctx.fillRect(i, -14, 6, 28);
-  ctx.restore();
+/** Draws the photo cover-fitted into its film frame (capture is 4:3, so it fills exactly). */
+function drawPhoto(ctx: CanvasRenderingContext2D, photo: HTMLCanvasElement, y: number) {
+  ctx.drawImage(photo, RAIL, y, FRAME_W, SLOT_H);
+  const g = ctx.createRadialGradient(STRIP_W / 2, y + SLOT_H / 2, SLOT_H * 0.45, STRIP_W / 2, y + SLOT_H / 2, FRAME_W * 0.7);
+  g.addColorStop(0, "rgba(20, 12, 6, 0)");
+  g.addColorStop(1, "rgba(20, 12, 6, 0.35)");
+  ctx.fillStyle = g;
+  ctx.fillRect(RAIL, y, FRAME_W, SLOT_H);
 }
 
 export interface StripInput {
@@ -230,16 +275,15 @@ export interface StripInput {
   host: HostSettings;
 }
 
-/** Composites the 1200 × 3600 strip in the party poster's style. No QR on it. */
+/** Composites the 1200 × 3600 film strip. No QR on it. */
 export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCanvasElement> {
-  const [paper, seal, talY, talW, talR, skull, web] = await Promise.all([
+  const [paper, seal, pumpkin, starG, starS, clock, cassette, skull, bat, bow, web] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
     loadImage("/kit/wax-seal-blank.svg"),
-    loadImage("/decor/talisman-yellow.svg"),
-    loadImage("/decor/talisman-white.svg"),
-    loadImage("/decor/talisman-red.svg"),
-    loadImage("/decor/skull.svg"),
-    loadImage("/decor/web.svg"),
+    loadImage("/kit/pumpkin.svg"),
+    ...["star-gold", "star-silver", "clock", "cassette", "skull", "bat", "bow-velvet", "web"].map((n) =>
+      loadImage(`/decor/${n}.svg`),
+    ),
   ]);
 
   const c = document.createElement("canvas");
@@ -249,90 +293,77 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "center";
 
-  // black backing, a torn sheet of dark paper on top
-  ctx.fillStyle = "#070404";
-  ctx.fillRect(0, 0, STRIP_W, STRIP_H);
-  ctx.save();
-  deckledPath(ctx, STRIP_W, STRIP_H, 16, 1031);
-  ctx.shadowColor = "rgba(196, 22, 28, 0.35)";
-  ctx.shadowBlur = 12;
-  ctx.fillStyle = "#1c120e";
-  ctx.fill();
-  ctx.shadowColor = "transparent";
-  ctx.clip();
-  wall(ctx, paper, STRIP_W, STRIP_H);
-  ctx.restore();
+  film(ctx, STRIP_W, STRIP_H, 1031);
 
-  // header: presenter ◆ label, then the event title in poster lettering
-  ctx.drawImage(web, M - 10, M - 10, 170, 170);
-  ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(web, -(STRIP_W - M + 10), M - 10, 170, 170);
-  ctx.restore();
+  // frame 1: title card
+  agedCard(ctx, paper, RAIL, TITLE_Y, FRAME_W, CARD_H);
+  ctx.drawImage(web, RAIL, TITLE_Y, 190, 190);
   ctx.fillStyle = BLOOD;
   ctx.font = `500 30px ${LABEL}`;
-  spaced(ctx, host.presenter.toUpperCase(), STRIP_W / 2 - 250, M + 72, 8);
-  spaced(ctx, host.subtitle.toUpperCase(), STRIP_W / 2 + 250, M + 72, 8);
-  diamondRule(ctx, STRIP_W / 2, M + 62, 110);
-
+  spaced(ctx, host.presenter.toUpperCase(), STRIP_W / 2 - 240, TITLE_Y + 110, 8);
+  spaced(ctx, host.subtitle.toUpperCase(), STRIP_W / 2 + 240, TITLE_Y + 110, 8);
+  diamondRule(ctx, STRIP_W / 2, TITLE_Y + 100, 100);
+  const words = host.eventName.toUpperCase().split(/\s+/);
+  const lines = words.length >= 3 ? [words.slice(0, -1).join(" "), words[words.length - 1]] : [words.join(" ")];
   ctx.save();
-  ctx.translate(STRIP_W / 2, M + 262);
+  ctx.translate(STRIP_W / 2, TITLE_Y + (lines.length > 1 ? 270 : 330));
   ctx.rotate((-2 * Math.PI) / 180);
-  fitFont(ctx, host.eventName.toUpperCase(), (px) => `${px}px ${DISPLAY}`, 112, 1000);
-  ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 6;
-  ctx.fillStyle = "#2a0406";
-  ctx.fillText(host.eventName.toUpperCase(), 0, 5);
-  ctx.shadowColor = "rgba(196, 22, 28, 0.45)";
-  ctx.shadowBlur = 30;
-  ctx.shadowOffsetY = 0;
-  ctx.fillStyle = BLOOD;
-  ctx.fillText(host.eventName.toUpperCase(), 0, 0);
-  ctx.restore();
-
-  photos.forEach((p, i) => drawPhoto(ctx, p, M, PHOTO_Y[i]));
-
-  // talismans taped along the outer edges, clear of faces
-  const tals = [talY, talW, talR];
-  [
-    [M - 30, PHOTO_Y[0] + 470, -8],
-    [STRIP_W - M - 52, PHOTO_Y[1] + 420, 7],
-    [M - 34, PHOTO_Y[2] + 480, 6],
-  ].forEach(([x, y, rot], i) => {
-    sticker(ctx, tals[i], x, y, 82, rot);
-    tape(ctx, x + 41, y + 8, 96, rot - 6, i === 1 ? BLOOD_DK : "#8f6e3e");
+  lines.forEach((line, i) => {
+    fitFont(ctx, line, (px) => `${px}px ${DISPLAY}`, i ? 150 : 118, FRAME_W - 90);
+    ctx.fillStyle = "#3a0608";
+    ctx.fillText(line, 0, i * 142 + 5);
+    ctx.fillStyle = BLOOD;
+    ctx.fillText(line, 0, i * 142);
   });
+  ctx.restore();
+  ctx.fillStyle = INK;
+  ctx.font = `30px ${HAND}`;
+  ctx.fillText("a night of costumes, music & surprises", STRIP_W / 2, TITLE_Y + CARD_H - 52);
 
-  // footer: the poster's details, then the seal
+  photos.forEach((p, i) => drawPhoto(ctx, p, PHOTO_Y[i]));
+
+  // last frame: the party details
   const fy = FOOTER_Y;
-  diamondRule(ctx, STRIP_W / 2, fy + 64, 230);
+  agedCard(ctx, paper, RAIL, fy, FRAME_W, CARD_H);
+  diamondRule(ctx, STRIP_W / 2, fy + 76, 240);
   ctx.fillStyle = BLOOD;
   const when = [host.eventDate, host.eventTime, host.venue].filter(Boolean).join("  ·  ").toUpperCase();
-  fitFont(ctx, when, (px) => `500 ${px}px ${LABEL}`, 46, 1020);
-  ctx.fillText(when, STRIP_W / 2, fy + 150);
-  ctx.fillStyle = BONE;
-  ctx.font = `500 26px ${SERIF}`;
-  spaced(ctx, [host.eventDay, host.city].filter(Boolean).join(" · ").toUpperCase(), STRIP_W / 2, fy + 202, 7);
+  fitFont(ctx, when, (px) => `500 ${px}px ${LABEL}`, 50, FRAME_W - 80);
+  ctx.fillText(when, STRIP_W / 2, fy + 168);
+  ctx.fillStyle = INK;
   ctx.font = `500 28px ${SERIF}`;
-  spaced(ctx, "SEE YOU IN COSTUME", STRIP_W / 2, fy + 276, 12);
-  drawSeal(ctx, seal, STRIP_W / 2, fy + 316, 160);
-  sticker(ctx, skull, STRIP_W / 2 - 250, fy + 340, 110, -12);
-  sticker(ctx, tals[0], STRIP_W / 2 + 190, fy + 310, 60, 10);
-  tape(ctx, STRIP_W / 2 + 220, fy + 316, 80, 4, BLOOD_DK);
+  spaced(ctx, [host.eventDay, host.city].filter(Boolean).join(" · ").toUpperCase(), STRIP_W / 2, fy + 222, 7);
+  ctx.font = `36px ${HAND}`;
+  ctx.fillText("see you in costume", STRIP_W / 2, fy + 320);
+  drawSeal(ctx, seal, STRIP_W / 2, fy + 450, 170);
+  ctx.drawImage(pumpkin, STRIP_W / 2 - 330, fy + 400, 140, 122);
+  ctx.save();
+  ctx.translate(STRIP_W / 2 + 260, fy + 460);
+  ctx.rotate(0.12);
+  ctx.drawImage(bat, -90, -33, 180, 66);
+  ctx.restore();
+
+  edgePrint(ctx, [TITLE_Y, ...PHOTO_Y, FOOTER_Y]);
+
+  // stickers on the rails and the gaps between frames, as on the reference strip
+  sticker(ctx, starG, RAIL + 8, TITLE_Y + CARD_H + 14, 170, -14);
+  sticker(ctx, skull, STRIP_W - RAIL + 6, PHOTO_Y[0] + 120, 120, 12);
+  sticker(ctx, seal, STRIP_W - RAIL - 4, PHOTO_Y[1] - 14, 150, 0);
+  sticker(ctx, clock, RAIL - 2, PHOTO_Y[2] - 14, 170, -6);
+  sticker(ctx, starS, RAIL - 30, PHOTO_Y[2] + 600, 90, 18);
+  sticker(ctx, bow, STRIP_W - RAIL + 10, PHOTO_Y[2] + 560, 160, 10);
+  sticker(ctx, cassette, STRIP_W - RAIL - 50, FOOTER_Y + CARD_H - 34, 250, -10);
+  tape(ctx, STRIP_W - RAIL - 50, FOOTER_Y + CARD_H - 110, 130, -4);
 
   return c;
 }
 
-/** 1080 × 1920 story image: the strip on the dark wall, talismans and a skull around it. */
+/** 1080 × 1920 story image: the film strip on a black album page with vintage stickers. */
 export async function composeStory(strip: HTMLCanvasElement, host: HostSettings): Promise<HTMLCanvasElement> {
-  const [paper, talY, talW, talR, skull, web] = await Promise.all([
+  const [paper, camera, disco, ticket, starG, starR, bow, skull, pumpkin] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
-    loadImage("/decor/talisman-yellow.svg"),
-    loadImage("/decor/talisman-white.svg"),
-    loadImage("/decor/talisman-red.svg"),
-    loadImage("/decor/skull.svg"),
-    loadImage("/decor/web.svg"),
+    ...["camera", "disco-ball", "ticket", "star-gold", "star-red", "bow-gingham", "skull"].map((n) => loadImage(`/decor/${n}.svg`)),
+    loadImage("/kit/pumpkin.svg"),
   ]);
   const W = 1080;
   const H = 1920;
@@ -340,42 +371,46 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   c.width = W;
   c.height = H;
   const ctx = c.getContext("2d")!;
-  wall(ctx, paper, W, H);
-  ctx.drawImage(web, 0, 0, 260, 260);
+
+  // black photo-album page
+  ctx.fillStyle = "#171311";
+  ctx.fillRect(0, 0, W, H);
   ctx.save();
-  ctx.scale(-1, 1);
-  ctx.drawImage(web, -W, 0, 260, 260);
+  ctx.globalCompositeOperation = "soft-light";
+  ctx.globalAlpha = 0.5;
+  ctx.drawImage(paper, 0, 0, W, H);
   ctx.restore();
+  const glow = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, W);
+  glow.addColorStop(0, "rgba(160, 18, 22, 0.18)");
+  glow.addColorStop(1, "rgba(0, 0, 0, 0.55)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
 
-  ctx.textAlign = "center";
-  ctx.fillStyle = BLOOD;
-  ctx.font = `500 30px ${LABEL}`;
-  spaced(ctx, host.presenter.toUpperCase(), W / 2 - 230, 122, 8);
-  spaced(ctx, host.subtitle.toUpperCase(), W / 2 + 230, 122, 8);
-  diamondRule(ctx, W / 2, 112, 100);
-
-  sticker(ctx, talY, 70, 330, 110, -10);
-  sticker(ctx, talR, 900, 520, 100, 8);
-  sticker(ctx, talW, 80, 1180, 96, 6);
-  sticker(ctx, skull, 850, 1400, 150, 12);
-  tape(ctx, 125, 342, 120, -16, BLOOD_DK);
-  tape(ctx, 950, 530, 110, 2, "#8f6e3e");
-  tape(ctx, 128, 1190, 110, 0, BLOOD_DK);
-
-  const sh = 1480;
+  const sh = 1500;
   const sw = (strip.width / strip.height) * sh;
   ctx.save();
-  ctx.translate(W / 2, H / 2 - 20);
-  ctx.rotate((-1.5 * Math.PI) / 180);
+  ctx.translate(W / 2, H / 2 + 20);
+  ctx.rotate((-2 * Math.PI) / 180);
   ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
   ctx.shadowBlur = 50;
   ctx.shadowOffsetY = 20;
   ctx.drawImage(strip, -sw / 2, -sh / 2, sw, sh);
   ctx.restore();
 
-  ctx.font = `500 30px ${SERIF}`;
-  ctx.fillStyle = BONE;
-  spaced(ctx, "SEE YOU IN COSTUME", W / 2, H - 80, 12);
+  sticker(ctx, camera, 210, 230, 300, -8);
+  sticker(ctx, disco, 880, 210, 220, 6);
+  sticker(ctx, starG, 120, 760, 130, -16);
+  sticker(ctx, starR, 950, 640, 110, 14);
+  sticker(ctx, bow, 920, 1180, 200, 12);
+  sticker(ctx, skull, 150, 1300, 150, -10);
+  sticker(ctx, pumpkin, 900, 1640, 190, 4);
+  sticker(ctx, ticket, 220, 1740, 300, -6);
+  tape(ctx, 220, 1690, 120, 4);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#EDE6D6";
+  ctx.font = `34px ${HAND}`;
+  ctx.fillText(`${host.presenter} · ${host.subtitle}`.toLowerCase(), W / 2, H - 50);
   return c;
 }
 
