@@ -20,9 +20,9 @@ body::before{content:"";position:fixed;inset:0;background:url(/kit/parchment-tex
 .clg-item{position:absolute}.clg-body{position:relative;container-type:inline-size;transform:rotate(var(--rot))}.clg-body>img{display:block;width:100%;height:auto}
 .clg-string{position:absolute;left:50%;bottom:100%;width:1.5px;background:#8a8a86}
 .sticker{filter:drop-shadow(2px 0 0 #F2EADA) drop-shadow(-2px 0 0 #F2EADA) drop-shadow(0 2px 0 #F2EADA) drop-shadow(0 -2px 0 #F2EADA) drop-shadow(0 8px 10px rgba(0,0,0,.6))}
-.witch-fly{position:absolute;top:13vh;left:0;width:120px;animation:fly 26s linear infinite}.witch-fly img{width:100%;display:block}
-@keyframes fly{0%{transform:translateX(-160px)}100%{transform:translateX(calc(100vw + 160px))}}
-.bat{position:absolute}.bat img{width:100%;display:block;filter:drop-shadow(0 0 4px rgba(196,22,28,.55));animation:flap .32s ease-in-out infinite alternate}
+.witch-fly{position:absolute;top:13vh;left:0;width:110px;animation:fly 26s linear infinite}.witch-fly img{width:100%;display:block}
+@keyframes fly{0%{transform:translateX(calc(100vw + 160px))}100%{transform:translateX(-160px)}}
+.bat{position:absolute}.bat img{width:100%;display:block;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5));animation:flap .32s ease-in-out infinite alternate}
 @keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.6)}}
 main{position:relative;z-index:1;width:100%;max-width:440px;margin:0 auto;padding:12vh 22px 20vh;display:flex;flex-direction:column;align-items:center;text-align:center;gap:22px}
 .ticket{position:relative;width:100%;padding:12px 26px 16px;color:var(--ink);transform:rotate(-1.2deg);filter:drop-shadow(0 10px 14px rgba(0,0,0,.7));

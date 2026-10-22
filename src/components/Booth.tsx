@@ -668,7 +668,7 @@ export default function Booth() {
           <Card className="review-copy">
             <p className="kicker">Roll two · The proof</p>
             <h1 className="page-title">Is this your tale?</h1>
-            <img className="pumpkin" src="/kit/pumpkin.svg" alt="" />
+            <img className="pumpkin" src="/decor/jack-o-lantern.svg" alt="" />
             <div className="review-actions">
               <SealButton onClick={print} disabled={!strip}>
                 Print my tale

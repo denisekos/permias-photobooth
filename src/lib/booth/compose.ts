@@ -57,11 +57,14 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   return p;
 }
 
-const STICKERS = ["star-gold", "star-silver", "clock", "cassette", "skull", "bat", "bow-velvet", "web", "camera", "disco-ball", "ticket"];
+const STICKERS = [
+  "star-gold", "star-silver", "star-red", "clock", "cassette", "ghost-pumpkin", "bat-sketch", "witch-hat-sketch",
+  "jack-o-lantern", "cat-banjo", "web", "camera", "disco-ball", "ticket", "bow-gingham",
+];
 
 export async function preloadAssets() {
   await Promise.all([
-    ...["parchment-texture.png", "wax-seal-blank.svg", "pumpkin.svg"].map((f) => loadImage(`/kit/${f}`)),
+    ...["parchment-texture.png", "wax-seal-blank.svg"].map((f) => loadImage(`/kit/${f}`)),
     ...STICKERS.map((f) => loadImage(`/decor/${f}.svg`)),
     document.fonts?.load(`500 26px ${SERIF}`),
     document.fonts?.load(`100px ${DISPLAY}`),
@@ -277,12 +280,11 @@ export interface StripInput {
 
 /** Composites the 1200 × 3600 film strip. No QR on it. */
 export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCanvasElement> {
-  const [paper, seal, pumpkin, starG, starS, clock, cassette, skull, bat, bow, web] = await Promise.all([
+  const [paper, seal, jack, starG, starS, clock, cassette, ghost, bat, hat, web] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
     loadImage("/kit/wax-seal-blank.svg"),
-    loadImage("/kit/pumpkin.svg"),
-    ...["star-gold", "star-silver", "clock", "cassette", "skull", "bat", "bow-velvet", "web"].map((n) =>
-      loadImage(`/decor/${n}.svg`),
+    ...["jack-o-lantern", "star-gold", "star-silver", "clock", "cassette", "ghost-pumpkin", "bat-sketch", "witch-hat-sketch", "web"].map(
+      (n) => loadImage(`/decor/${n}.svg`),
     ),
   ]);
 
@@ -336,22 +338,22 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   ctx.font = `36px ${HAND}`;
   ctx.fillText("see you in costume", STRIP_W / 2, fy + 320);
   drawSeal(ctx, seal, STRIP_W / 2, fy + 450, 170);
-  ctx.drawImage(pumpkin, STRIP_W / 2 - 330, fy + 400, 140, 122);
+  ctx.drawImage(jack, STRIP_W / 2 - 340, fy + 390, 150, 140);
   ctx.save();
-  ctx.translate(STRIP_W / 2 + 260, fy + 460);
-  ctx.rotate(0.12);
-  ctx.drawImage(bat, -90, -33, 180, 66);
+  ctx.translate(STRIP_W / 2 + 270, fy + 450);
+  ctx.rotate(-0.1);
+  ctx.drawImage(bat, -100, -66, 200, 132);
   ctx.restore();
 
   edgePrint(ctx, [TITLE_Y, ...PHOTO_Y, FOOTER_Y]);
 
   // stickers on the rails and the gaps between frames, as on the reference strip
   sticker(ctx, starG, RAIL + 8, TITLE_Y + CARD_H + 14, 170, -14);
-  sticker(ctx, skull, STRIP_W - RAIL + 6, PHOTO_Y[0] + 120, 120, 12);
+  sticker(ctx, ghost, STRIP_W - RAIL + 4, PHOTO_Y[0] + 150, 110, 10);
   sticker(ctx, seal, STRIP_W - RAIL - 4, PHOTO_Y[1] - 14, 150, 0);
   sticker(ctx, clock, RAIL - 2, PHOTO_Y[2] - 14, 170, -6);
   sticker(ctx, starS, RAIL - 30, PHOTO_Y[2] + 600, 90, 18);
-  sticker(ctx, bow, STRIP_W - RAIL + 10, PHOTO_Y[2] + 560, 160, 10);
+  sticker(ctx, hat, STRIP_W - RAIL + 6, PHOTO_Y[2] + 600, 170, 12);
   sticker(ctx, cassette, STRIP_W - RAIL - 50, FOOTER_Y + CARD_H - 34, 250, -10);
   tape(ctx, STRIP_W - RAIL - 50, FOOTER_Y + CARD_H - 110, 130, -4);
 
@@ -360,10 +362,11 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
 
 /** 1080 × 1920 story image: the film strip on a black album page with vintage stickers. */
 export async function composeStory(strip: HTMLCanvasElement, host: HostSettings): Promise<HTMLCanvasElement> {
-  const [paper, camera, disco, ticket, starG, starR, bow, skull, pumpkin] = await Promise.all([
+  const [paper, camera, disco, ticket, starG, starR, bow, cat, ghost] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
-    ...["camera", "disco-ball", "ticket", "star-gold", "star-red", "bow-gingham", "skull"].map((n) => loadImage(`/decor/${n}.svg`)),
-    loadImage("/kit/pumpkin.svg"),
+    ...["camera", "disco-ball", "ticket", "star-gold", "star-red", "bow-gingham", "cat-banjo", "ghost-pumpkin"].map((n) =>
+      loadImage(`/decor/${n}.svg`),
+    ),
   ]);
   const W = 1080;
   const H = 1920;
@@ -402,8 +405,8 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   sticker(ctx, starG, 120, 760, 130, -16);
   sticker(ctx, starR, 950, 640, 110, 14);
   sticker(ctx, bow, 920, 1180, 200, 12);
-  sticker(ctx, skull, 150, 1300, 150, -10);
-  sticker(ctx, pumpkin, 900, 1640, 190, 4);
+  sticker(ctx, ghost, 140, 1290, 170, -8);
+  sticker(ctx, cat, 920, 1580, 190, 6);
   sticker(ctx, ticket, 220, 1740, 300, -6);
   tape(ctx, 220, 1690, 120, 4);
 

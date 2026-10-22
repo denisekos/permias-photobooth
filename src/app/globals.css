@@ -223,9 +223,9 @@ img {
   position: absolute;
   top: 15vh;
   left: 0;
-  width: 190px;
+  width: 170px;
   animation: fly 34s linear infinite;
-  filter: drop-shadow(0 0 6px rgba(201, 162, 78, 0.35));
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.55));
 }
 
 .witch-fly img {
@@ -235,8 +235,8 @@ img {
 }
 
 @keyframes fly {
-  0% { transform: translateX(-260px); }
-  100% { transform: translateX(calc(100vw + 260px)); }
+  0% { transform: translateX(calc(100vw + 260px)); }
+  100% { transform: translateX(-260px); }
 }
 
 .bat {
@@ -249,7 +249,7 @@ img {
   display: block;
   transform-origin: 50% 40%;
   animation: flap 0.32s ease-in-out infinite alternate;
-  filter: drop-shadow(0 0 4px rgba(196, 22, 28, 0.55));
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.5));
 }
 
 @keyframes flap {
