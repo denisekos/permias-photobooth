@@ -5,8 +5,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PHOTO_RECTS, composeStory, composeStrip, encode, encodeJpeg, preloadAssets } from "@/lib/booth/compose";
 import { gainFor, ghostOf, grabPhoto, sampleLuminance } from "@/lib/booth/photo";
 import { DEFAULT_HOST, deviceId, loadHost, saveHost, type HostSettings } from "@/lib/booth/settings";
-import * as sound from "@/lib/booth/sound";
-import Collage from "./Collage";
 
 type Screen = "attract" | "waking" | "denied" | "frame" | "capture" | "review" | "print";
 
@@ -87,7 +85,6 @@ export default function Booth() {
   const [leafDone, setLeafDone] = useState(0);
   const [host, setHost] = useState<HostSettings>(DEFAULT_HOST);
   const [hostOpen, setHostOpen] = useState(false);
-  const [soundOn, setSoundOn] = useState(false);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [gain, setGain] = useState(1);
@@ -121,15 +118,8 @@ export default function Booth() {
   useEffect(() => {
     const h = loadHost();
     setHost(h);
-    setSoundOn(h.soundOn);
     preloadAssets();
   }, []);
-
-  useEffect(() => {
-    sound.setSoundEnabled(soundOn);
-    if (soundOn && screen === "attract") sound.startAmbient();
-    else sound.stopAmbient();
-  }, [soundOn, screen]);
 
   /** Throws Cancelled once the session has been reset, so async flows stop cleanly. */
   const sleep = useCallback((ms: number, token: number) => {
@@ -143,7 +133,6 @@ export default function Booth() {
       setScreen(next);
       if (turn && !reduced) {
         setTurnKey((k) => k + 1);
-        sound.pageTurn();
       }
     },
     [reduced],
@@ -272,14 +261,12 @@ export default function Booth() {
         setShotIndex(i);
         for (const n of [5, 4, 3, 2, 1]) {
           setCountdown(n);
-          sound.tick();
           await sleep(1000, token);
         }
         setCountdown(null);
         setFlash(true);
         await sleep(170, token); // let the flash light the room before the frame is grabbed
         const photo = grabPhoto(video, gainRef.current);
-        sound.shutter();
         photos.current.push(photo);
         setShots((s) => [...s, photo.toDataURL("image/jpeg", 0.8)]);
         await sleep(160, token);
@@ -412,7 +399,6 @@ export default function Booth() {
     const token = session.current;
     setReady(false);
     goTo("print");
-    sound.printer([0.8, 2.15, 3.5]);
     runUpload(token);
     try {
       await sleep(reduced ? PRINT_MS_REDUCED : PRINT_MS, token);
@@ -507,7 +493,6 @@ export default function Booth() {
     const next = { ...host, ...patch };
     setHost(next);
     saveHost(next);
-    if ("soundOn" in patch) setSoundOn(Boolean(patch.soundOn));
   };
 
   const previewStyle = { filter: `brightness(${gain})` };
@@ -515,7 +500,6 @@ export default function Booth() {
 
   return (
     <div className={`booth${reduced ? " reduced" : ""}`}>
-      <Collage variant={screen === "attract" || screen === "waking" ? "home" : "page"} />
       {(screen === "attract" || screen === "waking") && (
         <section className={`screen home${screen === "waking" ? " waking" : ""}`} aria-label="Start">
           <button type="button" className="pumpkin-start" onClick={openBook} disabled={screen === "waking"}>
@@ -618,6 +602,7 @@ export default function Booth() {
             )}
           </div>
           <img className="art screen-cat" src="/art/cat-banjo.webp" alt="" aria-hidden="true" />
+          <img className="art screen-bat" src="/art/bat.webp" alt="" aria-hidden="true" />
           <Card className="review-copy">
             <p className="kicker">Roll two · The proof</p>
             <h1 className="page-title">Is this your tale?</h1>
@@ -640,6 +625,7 @@ export default function Booth() {
         <section className={`screen page print${ready ? " ready" : ""}`} aria-label="Your strip">
           <div className="print-left">
             <img className="art print-ghost" src="/art/ghost.webp" alt="" aria-hidden="true" />
+            <img className="art print-witch" src="/art/witch-broom.webp" alt="" aria-hidden="true" />
             <div className="caption" aria-live="polite">
               {ready && (
                 <Card className="caption-card">
@@ -733,14 +719,6 @@ export default function Booth() {
         <div key={turnKey} className="leaf" aria-hidden="true" onAnimationEnd={(e) => e.target === e.currentTarget && setLeafDone(turnKey)} />
       )}
 
-      <button
-        type="button"
-        className="sound-toggle"
-        aria-pressed={soundOn}
-        onClick={() => setSoundOn((s) => !s)}
-      >
-        Sound {soundOn ? "on" : "off"}
-      </button>
       <button type="button" className="host-gear" onClick={() => setHostOpen(true)} aria-label="Host settings (Shift+H)">
         ✦
       </button>
@@ -750,13 +728,13 @@ export default function Booth() {
           <form className="host" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); setHostOpen(false); }}>
             <h2>Host settings</h2>
             <label>
-              Event name (title on the cover and strip)
+              Event name (title on the strip)
               <input value={host.eventName} onChange={(e) => updateHost({ eventName: e.target.value })} maxLength={48} />
             </label>
             {(
               [
-                ["presenter", "Presented by (top left)"],
-                ["subtitle", "Top right label"],
+                ["presenter", "Presented by (strip title frame)"],
+                ["subtitle", "Label beside it"],
                 ["eventDate", "Date"],
                 ["eventDay", "Day"],
                 ["eventTime", "Time"],
@@ -770,10 +748,6 @@ export default function Booth() {
                 <input value={host[key]} onChange={(e) => updateHost({ [key]: e.target.value })} maxLength={48} />
               </label>
             ))}
-            <label className="check">
-              <input type="checkbox" checked={host.soundOn} onChange={(e) => updateHost({ soundOn: e.target.checked })} />
-              Sound on by default
-            </label>
             <div className="host-actions">
               <button type="button" onClick={() => document.documentElement.requestFullscreen?.().catch(() => {})}>
                 Enter full screen

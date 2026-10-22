@@ -1,7 +1,7 @@
 /* =====================================================================
    Pencil-and-paper Halloween: a plain dark-brown ground from the party
-   palette, a few pieces of public-domain artwork, 35mm film for every
-   photo frame, and pumpkin-orange lettering.
+   palette, a few pieces of still public-domain artwork, 35mm film for
+   every photo frame, and pumpkin-orange lettering.
    ===================================================================== */
 
 :root {
@@ -97,71 +97,6 @@ img {
   height: auto;
   pointer-events: none;
   filter: drop-shadow(0 12px 14px rgba(0, 0, 0, 0.45));
-}
-
-.collage {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* the witch and a bat cross the screen now and then */
-.fly {
-  position: absolute;
-  left: 0;
-  will-change: transform;
-}
-
-.fly img {
-  display: block;
-  width: 100%;
-  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, 0.45));
-}
-
-.fly.witch {
-  top: 8vh;
-  width: 150px;
-  animation: fly-left 38s linear infinite;
-  animation-delay: -6s;
-}
-
-.fly.witch img {
-  animation: bob 3.4s ease-in-out infinite;
-}
-
-.fly.bat {
-  top: 24vh;
-  width: 90px;
-  animation: fly-right 27s linear infinite;
-  animation-delay: -20s;
-}
-
-.fly.bat img {
-  transform-origin: 50% 45%;
-  animation: flap 0.34s ease-in-out infinite alternate;
-}
-
-@keyframes fly-left {
-  0% { transform: translateX(calc(100vw + 200px)); }
-  45%, 100% { transform: translateX(-220px); }
-}
-
-@keyframes fly-right {
-  0% { transform: translateX(-160px) translateY(0); }
-  30% { transform: translateX(40vw) translateY(-30px); }
-  55%, 100% { transform: translateX(calc(100vw + 160px)) translateY(10px); }
-}
-
-@keyframes flap {
-  from { transform: scaleY(1); }
-  to { transform: scaleY(0.7); }
-}
-
-@keyframes bob {
-  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
-  50% { transform: translate(6px, -10px) rotate(2deg); }
 }
 
 /* ---------- type ---------- */
@@ -294,7 +229,6 @@ img {
   border: 0;
   background: none;
   cursor: pointer;
-  animation: bob 5s ease-in-out infinite;
 }
 
 .pumpkin-start img {
@@ -302,26 +236,11 @@ img {
   height: min(46vh, 440px);
   width: auto;
   filter: drop-shadow(0 22px 26px rgba(0, 0, 0, 0.55));
-  transition: transform 0.25s ease;
-}
-
-.pumpkin-start:hover img,
-.pumpkin-start:focus-visible img {
-  transform: scale(1.04) rotate(-2deg);
 }
 
 .pumpkin-start:focus-visible {
   outline-offset: 12px;
   border-radius: 50%;
-}
-
-.home.waking .pumpkin-start {
-  animation: wobble 0.5s ease-in-out infinite;
-}
-
-@keyframes wobble {
-  0%, 100% { transform: rotate(-4deg); }
-  50% { transform: rotate(4deg); }
 }
 
 .home-hint {
@@ -598,6 +517,14 @@ img {
   gap: 7vw;
 }
 
+.screen-bat {
+  position: absolute;
+  top: 4vh;
+  right: 5vw;
+  width: min(15vh, 140px);
+  transform: rotate(8deg);
+}
+
 .screen-cat {
   position: absolute;
   right: 3vw;
@@ -706,6 +633,13 @@ img {
   width: min(20vh, 180px);
   margin-right: 30px;
   transform: rotate(-4deg);
+}
+
+.print-witch {
+  position: absolute;
+  top: 3vh;
+  left: 3vw;
+  width: min(17vh, 150px);
 }
 
 .caption {
@@ -1077,24 +1011,6 @@ img {
   to { opacity: 1; }
 }
 
-.sound-toggle {
-  position: fixed;
-  right: 18px;
-  bottom: 14px;
-  z-index: 25;
-  padding: 5px 10px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  font-family: var(--type);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--greige);
-  opacity: 0.55;
-  cursor: pointer;
-}
-
 .host-gear {
   position: fixed;
   left: 14px;
@@ -1192,12 +1108,10 @@ img {
 
 /* ---------- reduced motion ---------- */
 
-.reduced .leaf,
-.reduced .fly {
+.reduced .leaf {
   display: none;
 }
 
-.reduced .pumpkin-start,
 .reduced .countdown,
 .reduced .quill .ink-line,
 .reduced .quill .nib,

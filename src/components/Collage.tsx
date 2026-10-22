@@ -1,29 +1,14 @@
 /**
- * The few pieces of artwork outside the main content: the witch on her broom and a bat
- * crossing the screen now and then, and (on the phone pages) a ghost and a bat in the
- * corners. Public-domain artwork from public/art. No hooks, so the phone download page
- * renders the same markup on the server (scripts/gen-scenery.tsx).
+ * Still artwork for the phone download pages: a ghost, a bat and the witch on her broom in
+ * the corners. Public-domain artwork from public/art. No hooks, because
+ * scripts/gen-scenery.tsx renders it to static markup for the phone route handlers.
  */
-export type CollageVariant = "home" | "page" | "phone";
-
-export default function Collage({ variant = "page" }: { variant?: CollageVariant }) {
-  if (variant === "home") return null;
+export default function Collage() {
   return (
-    <div className={`collage ${variant}`} aria-hidden="true">
-      {variant === "phone" && (
-        <>
-          <img className="art phone-ghost" src="/art/ghost.webp" alt="" />
-          <img className="art phone-bat" src="/art/bat.webp" alt="" />
-        </>
-      )}
-      <div className="fly witch">
-        <img src="/art/witch-broom.webp" alt="" />
-      </div>
-      {variant === "page" && (
-        <div className="fly bat">
-          <img src="/art/bat.webp" alt="" />
-        </div>
-      )}
+    <div className="collage" aria-hidden="true">
+      <img className="art phone-ghost" src="/art/ghost.webp" alt="" />
+      <img className="art phone-bat" src="/art/bat.webp" alt="" />
+      <img className="art phone-witch" src="/art/witch-broom.webp" alt="" />
     </div>
   );
 }

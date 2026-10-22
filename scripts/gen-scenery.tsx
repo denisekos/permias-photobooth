@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import Collage from "../src/components/Collage";
 
 const html = renderToStaticMarkup(
-  <Collage variant="phone" />,
+  <Collage />,
 );
 
 writeFileSync(

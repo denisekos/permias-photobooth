@@ -8,7 +8,6 @@ export interface HostSettings {
   doors: string;
   venue: string;
   city: string;
-  soundOn: boolean;
 }
 
 /** Defaults match the party poster; all of it is editable in host settings (Shift+H). */
@@ -22,7 +21,6 @@ export const DEFAULT_HOST: HostSettings = {
   doors: "Doors open 9 PM",
   venue: "@ SoHo",
   city: "New York, NY",
-  soundOn: false,
 };
 
 const KEY = "sum-host-settings";

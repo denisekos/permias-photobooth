@@ -4,9 +4,9 @@ A laptop photobooth that takes 3 photos, prints them as a storybook strip with a
 
 ## Look
 
-Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. Colours come from the party palette (dark brown, greige paper, rust, pumpkin orange). Each inner screen has one piece of public-domain artwork (a witch hat, a banjo-playing black cat, a ghost holding a pumpkin), and the witch on her broom and a bat fly past now and then. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
+Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. Colours come from the party palette (dark brown, greige paper, rust, pumpkin orange). All artwork is still: the camera screen has a witch hat, the review screen the banjo-playing black cat and a bat, and the print screen the ghost holding a pumpkin and the witch on her broom. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
 
-Artwork lives in `public/art/`. `npm run gen:scenery` renders the phone-page artwork and runs before `dev` and `build`.
+Artwork lives in `public/art/`. `npm run gen:scenery` renders the phone-page artwork (`src/components/Collage.tsx`) and runs before `dev` and `build`.
 
 Party details (presenter, date, day, time, doors, venue, city) are editable in host settings (Shift+H).
 
@@ -33,7 +33,7 @@ No database is needed: each strip's record is a small JSON object stored next to
 
 ## On the night
 
-- Open the site in Chrome, allow the camera once, then press **Shift+H** for host settings: event name, date, subtitle, default sound, full screen.
+- Open the site in Chrome, allow the camera once, then press **Shift+H** for host settings: event details and full screen.
 - For a real kiosk: `google-chrome --kiosk --app=https://your-domain`.
 - **Shift+Esc** resets a stuck session from any screen.
 - **Space** runs the main action on every page (open, begin, print). **R** retakes on the review page.
@@ -50,10 +50,9 @@ No database is needed: each strip's record is a small JSON object stored next to
 | `GET /s/:id` phone page / 410 "faded into the mist" | `src/app/s/[id]/route.ts`, `src/lib/server/download-page.ts` |
 | `GET /api/strips/:id/image` → 10-minute signed URL, counts downloads | `src/app/api/strips/[id]/image/route.ts` |
 | Hourly cleanup | `src/app/api/cron/cleanup/route.ts` |
-| Synthesized sounds (muted by default) | `src/lib/booth/sound.ts` |
-| Flying artwork and phone-page artwork | `src/components/Collage.tsx`, `public/art/` |
+| Phone-page artwork | `src/components/Collage.tsx`, `public/art/` |
 
-P1 items included: host event details, story-format image, Web Share, sound. Photos are taken in natural colour (the filter and chapter pickers were removed), each after a 5-second countdown.
+P1 items included: host event details, story-format image, Web Share. Sound was dropped. Photos are taken in natural colour (the filter and chapter pickers were removed), each after a 5-second countdown.
 
 ## Behaviour worth knowing
 
