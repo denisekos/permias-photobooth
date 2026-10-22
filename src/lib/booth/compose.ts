@@ -25,13 +25,15 @@ export const PHOTO_RECTS = PHOTO_Y.map((y) => ({
   height: SLOT_H / STRIP_H,
 }));
 
-const FILM = "#141110";
-const HOLE = "#EDE6D6";
-const CARD = "#EDE3CC";
-const EDGE_INK = "#E3A33B";
+// colours from the party palette
+const FILM = "#131010";
+const HOLE = "#D8D3C9";
+const CARD = "#D3CEC4";
+const EDGE_INK = "#C0622F";
 const INK = "#1B1A1F";
-const BLOOD = "#C4161C";
-const BLOOD_DK = "#7A1014";
+const PUMPKIN = "#B5531F";
+const RUST = "#4F1C10";
+const BG = "#261D1B";
 
 const SERIF = '"Cormorant Garamond", "IM Fell English", Georgia, serif';
 const DISPLAY = '"Metal Mania", "Cormorant Garamond", serif';
@@ -57,15 +59,12 @@ export function loadImage(src: string): Promise<HTMLImageElement> {
   return p;
 }
 
-const STICKERS = [
-  "star-gold", "star-silver", "star-red", "clock", "cassette", "ghost-pumpkin", "bat-sketch", "witch-hat-sketch",
-  "jack-o-lantern", "cat-banjo", "web", "camera", "disco-ball", "ticket", "bow-gingham",
-];
+const ART = ["pumpkin", "ghost", "cat-banjo", "witch-hat", "witch-broom", "bat"];
 
 export async function preloadAssets() {
   await Promise.all([
-    ...["parchment-texture.png", "wax-seal-blank.svg"].map((f) => loadImage(`/kit/${f}`)),
-    ...STICKERS.map((f) => loadImage(`/decor/${f}.svg`)),
+    loadImage("/kit/parchment-texture.png"),
+    ...ART.map((f) => loadImage(`/art/${f}.webp`)),
     document.fonts?.load(`500 26px ${SERIF}`),
     document.fonts?.load(`100px ${DISPLAY}`),
     document.fonts?.load(`500 30px ${LABEL}`),
@@ -186,69 +185,22 @@ function edgePrint(ctx: CanvasRenderingContext2D, frames: number[]) {
   ctx.restore();
 }
 
-/** An image's silhouette filled with one colour, for sticker outlines (works without ctx.filter). */
-function silhouette(img: HTMLImageElement, w: number, h: number, color: string) {
-  const c = document.createElement("canvas");
-  c.width = Math.ceil(w);
-  c.height = Math.ceil(h);
-  const x = c.getContext("2d")!;
-  x.drawImage(img, 0, 0, w, h);
-  x.globalCompositeOperation = "source-in";
-  x.fillStyle = color;
-  x.fillRect(0, 0, w, h);
-  return c;
-}
-
-/** Draws an image as a die-cut sticker with a cream outline and a soft shadow. */
+/** Places a piece of artwork with a soft shadow (no outline). */
 function sticker(ctx: CanvasRenderingContext2D, img: HTMLImageElement, cx: number, cy: number, w: number, rot: number) {
   const h = (img.height / img.width) * w;
-  const sil = silhouette(img, w, h, "#F2EADA");
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate((rot * Math.PI) / 180);
-  ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 7;
-  for (const [dx, dy] of [[5, 0], [-5, 0], [0, 5], [0, -5], [4, 4], [-4, -4], [4, -4], [-4, 4]]) {
-    ctx.drawImage(sil, -w / 2 + dx, -h / 2 + dy);
-    ctx.shadowColor = "transparent";
-  }
+  ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
   ctx.restore();
-  sil.width = 0;
-}
-
-/** A strip of masking tape with torn ends. */
-function tape(ctx: CanvasRenderingContext2D, cx: number, cy: number, w: number, rot: number) {
-  const r = rng(Math.round(cx * 7 + cy));
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate((rot * Math.PI) / 180);
-  ctx.beginPath();
-  ctx.moveTo(-w / 2, -15);
-  for (let y = -15; y <= 15; y += 5) ctx.lineTo(-w / 2 + r() * 6, y);
-  ctx.lineTo(w / 2, 15);
-  for (let y = 15; y >= -15; y -= 5) ctx.lineTo(w / 2 - r() * 6, y);
-  ctx.closePath();
-  ctx.fillStyle = "rgba(226, 208, 168, 0.82)";
-  ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
-  ctx.shadowBlur = 4;
-  ctx.fill();
-  ctx.restore();
-}
-
-function drawSeal(ctx: CanvasRenderingContext2D, seal: HTMLImageElement, cx: number, cy: number, size: number) {
-  const s = size / 160;
-  ctx.drawImage(seal, cx - size / 2, cy - size / 2, size, size);
-  ctx.textAlign = "center";
-  ctx.font = `italic 600 ${30 * s}px ${SERIF}`;
-  ctx.fillStyle = "#5E1C1C";
-  ctx.fillText("SUM", cx, cy - size / 2 + 91 * s);
 }
 
 /** A rule with a diamond in the middle, the poster's ornament. */
 function diamondRule(ctx: CanvasRenderingContext2D, cx: number, y: number, half: number) {
-  ctx.strokeStyle = BLOOD;
+  ctx.strokeStyle = PUMPKIN;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.moveTo(cx - half, y);
@@ -280,12 +232,9 @@ export interface StripInput {
 
 /** Composites the 1200 × 3600 film strip. No QR on it. */
 export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCanvasElement> {
-  const [paper, seal, jack, starG, starS, clock, cassette, ghost, bat, hat, web] = await Promise.all([
+  const [paper, pumpkin, ghost, hat, bat] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
-    loadImage("/kit/wax-seal-blank.svg"),
-    ...["jack-o-lantern", "star-gold", "star-silver", "clock", "cassette", "ghost-pumpkin", "bat-sketch", "witch-hat-sketch", "web"].map(
-      (n) => loadImage(`/decor/${n}.svg`),
-    ),
+    ...["pumpkin", "ghost", "witch-hat", "bat"].map((n) => loadImage(`/art/${n}.webp`)),
   ]);
 
   const c = document.createElement("canvas");
@@ -299,8 +248,7 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
 
   // frame 1: title card
   agedCard(ctx, paper, RAIL, TITLE_Y, FRAME_W, CARD_H);
-  ctx.drawImage(web, RAIL, TITLE_Y, 190, 190);
-  ctx.fillStyle = BLOOD;
+  ctx.fillStyle = RUST;
   ctx.font = `500 30px ${LABEL}`;
   spaced(ctx, host.presenter.toUpperCase(), STRIP_W / 2 - 240, TITLE_Y + 110, 8);
   spaced(ctx, host.subtitle.toUpperCase(), STRIP_W / 2 + 240, TITLE_Y + 110, 8);
@@ -312,9 +260,9 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   ctx.rotate((-2 * Math.PI) / 180);
   lines.forEach((line, i) => {
     fitFont(ctx, line, (px) => `${px}px ${DISPLAY}`, i ? 150 : 118, FRAME_W - 90);
-    ctx.fillStyle = "#3a0608";
+    ctx.fillStyle = RUST;
     ctx.fillText(line, 0, i * 142 + 5);
-    ctx.fillStyle = BLOOD;
+    ctx.fillStyle = PUMPKIN;
     ctx.fillText(line, 0, i * 142);
   });
   ctx.restore();
@@ -328,7 +276,7 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   const fy = FOOTER_Y;
   agedCard(ctx, paper, RAIL, fy, FRAME_W, CARD_H);
   diamondRule(ctx, STRIP_W / 2, fy + 76, 240);
-  ctx.fillStyle = BLOOD;
+  ctx.fillStyle = PUMPKIN;
   const when = [host.eventDate, host.eventTime, host.venue].filter(Boolean).join("  ·  ").toUpperCase();
   fitFont(ctx, when, (px) => `500 ${px}px ${LABEL}`, 50, FRAME_W - 80);
   ctx.fillText(when, STRIP_W / 2, fy + 168);
@@ -337,36 +285,23 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   spaced(ctx, [host.eventDay, host.city].filter(Boolean).join(" · ").toUpperCase(), STRIP_W / 2, fy + 222, 7);
   ctx.font = `36px ${HAND}`;
   ctx.fillText("see you in costume", STRIP_W / 2, fy + 320);
-  drawSeal(ctx, seal, STRIP_W / 2, fy + 450, 170);
-  ctx.drawImage(jack, STRIP_W / 2 - 340, fy + 390, 150, 140);
-  ctx.save();
-  ctx.translate(STRIP_W / 2 + 270, fy + 450);
-  ctx.rotate(-0.1);
-  ctx.drawImage(bat, -100, -66, 200, 132);
-  ctx.restore();
+  sticker(ctx, pumpkin, STRIP_W / 2, fy + 470, 220, -3);
 
   edgePrint(ctx, [TITLE_Y, ...PHOTO_Y, FOOTER_Y]);
 
-  // stickers on the rails and the gaps between frames, as on the reference strip
-  sticker(ctx, starG, RAIL + 8, TITLE_Y + CARD_H + 14, 170, -14);
-  sticker(ctx, ghost, STRIP_W - RAIL + 4, PHOTO_Y[0] + 150, 110, 10);
-  sticker(ctx, seal, STRIP_W - RAIL - 4, PHOTO_Y[1] - 14, 150, 0);
-  sticker(ctx, clock, RAIL - 2, PHOTO_Y[2] - 14, 170, -6);
-  sticker(ctx, starS, RAIL - 30, PHOTO_Y[2] + 600, 90, 18);
-  sticker(ctx, hat, STRIP_W - RAIL + 6, PHOTO_Y[2] + 600, 170, 12);
-  sticker(ctx, cassette, STRIP_W - RAIL - 50, FOOTER_Y + CARD_H - 34, 250, -10);
-  tape(ctx, STRIP_W - RAIL - 50, FOOTER_Y + CARD_H - 110, 130, -4);
+  // a few pieces of artwork on the rails, clear of faces
+  sticker(ctx, bat, STRIP_W - RAIL - 30, TITLE_Y + CARD_H + 6, 260, -8);
+  sticker(ctx, ghost, RAIL + 4, PHOTO_Y[2] - 4, 170, -6);
+  sticker(ctx, hat, STRIP_W - RAIL - 20, PHOTO_Y[2] + SLOT_H + 14, 250, 10);
 
   return c;
 }
 
-/** 1080 × 1920 story image: the film strip on a black album page with vintage stickers. */
+/** 1080 × 1920 story image: the film strip on the plain dark ground, a ghost and the banjo cat beside it. */
 export async function composeStory(strip: HTMLCanvasElement, host: HostSettings): Promise<HTMLCanvasElement> {
-  const [paper, camera, disco, ticket, starG, starR, bow, cat, ghost] = await Promise.all([
+  const [paper, ghost, cat] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
-    ...["camera", "disco-ball", "ticket", "star-gold", "star-red", "bow-gingham", "cat-banjo", "ghost-pumpkin"].map((n) =>
-      loadImage(`/decor/${n}.svg`),
-    ),
+    ...["ghost", "cat-banjo"].map((n) => loadImage(`/art/${n}.webp`)),
   ]);
   const W = 1080;
   const H = 1920;
@@ -375,43 +310,35 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   c.height = H;
   const ctx = c.getContext("2d")!;
 
-  // black photo-album page
-  ctx.fillStyle = "#171311";
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, W, H);
   ctx.save();
   ctx.globalCompositeOperation = "soft-light";
-  ctx.globalAlpha = 0.5;
+  ctx.globalAlpha = 0.35;
   ctx.drawImage(paper, 0, 0, W, H);
   ctx.restore();
   const glow = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, W);
-  glow.addColorStop(0, "rgba(160, 18, 22, 0.18)");
-  glow.addColorStop(1, "rgba(0, 0, 0, 0.55)");
+  glow.addColorStop(0, "rgba(48, 37, 31, 0.6)");
+  glow.addColorStop(1, "rgba(15, 9, 8, 0.6)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  const sh = 1500;
+  const sh = 1520;
   const sw = (strip.width / strip.height) * sh;
   ctx.save();
-  ctx.translate(W / 2, H / 2 + 20);
+  ctx.translate(W / 2, H / 2 - 30);
   ctx.rotate((-2 * Math.PI) / 180);
-  ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
+  ctx.shadowColor = "rgba(0, 0, 0, 0.75)";
   ctx.shadowBlur = 50;
   ctx.shadowOffsetY = 20;
   ctx.drawImage(strip, -sw / 2, -sh / 2, sw, sh);
   ctx.restore();
 
-  sticker(ctx, camera, 210, 230, 300, -8);
-  sticker(ctx, disco, 880, 210, 220, 6);
-  sticker(ctx, starG, 120, 760, 130, -16);
-  sticker(ctx, starR, 950, 640, 110, 14);
-  sticker(ctx, bow, 920, 1180, 200, 12);
-  sticker(ctx, ghost, 140, 1290, 170, -8);
-  sticker(ctx, cat, 920, 1580, 190, 6);
-  sticker(ctx, ticket, 220, 1740, 300, -6);
-  tape(ctx, 220, 1690, 120, 4);
+  sticker(ctx, ghost, 170, 1520, 230, -6);
+  sticker(ctx, cat, 920, 1530, 230, 4);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#EDE6D6";
+  ctx.fillStyle = "#C0BBB1";
   ctx.font = `34px ${HAND}`;
   ctx.fillText(`${host.presenter} · ${host.subtitle}`.toLowerCase(), W / 2, H - 50);
   return c;

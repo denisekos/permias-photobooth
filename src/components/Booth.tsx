@@ -7,7 +7,6 @@ import { gainFor, ghostOf, grabPhoto, sampleLuminance } from "@/lib/booth/photo"
 import { DEFAULT_HOST, deviceId, loadHost, saveHost, type HostSettings } from "@/lib/booth/settings";
 import * as sound from "@/lib/booth/sound";
 import Collage from "./Collage";
-import { useParallax } from "./useParallax";
 
 type Screen = "attract" | "waking" | "denied" | "frame" | "capture" | "review" | "print";
 
@@ -38,7 +37,7 @@ function useReducedMotion() {
   return reduced;
 }
 
-function SealButton({
+function PillButton({
   children,
   onClick,
   variant = "primary",
@@ -50,29 +49,17 @@ function SealButton({
   disabled?: boolean;
 }) {
   return (
-    <button type="button" className={`seal-btn ${variant}`} onClick={onClick} disabled={disabled}>
-      <span className="seal" aria-hidden="true">
-        <img src="/kit/wax-seal-blank.svg" alt="" />
-        <span>SUM</span>
-      </span>
-      <span className="label">{children}</span>
+    <button type="button" className={`pill ${variant}`} onClick={onClick} disabled={disabled}>
+      {children}
     </button>
   );
 }
 
-/**
- * A card of aged paper clipped over scraps of ticking and gingham fabric, with foil stars,
- * like a page from a vintage album. Readable content sits on these.
- */
+/** A card of pencil-textured paper. Readable content sits on these. */
 function Card({ children, className }: { children: React.ReactNode; className: string }) {
   return (
     <div className={`card ${className}`}>
-      <i className="fabric ticking" aria-hidden="true" />
-      <i className="fabric gingham" aria-hidden="true" />
       <div className="panel">{children}</div>
-      <img className="clip" src="/decor/paperclip.svg" alt="" aria-hidden="true" />
-      <img className="foil f1 sticker" src="/decor/star-gold.svg" alt="" aria-hidden="true" />
-      <img className="foil f2 sticker" src="/decor/star-gold.svg" alt="" aria-hidden="true" />
     </div>
   );
 }
@@ -117,8 +104,6 @@ export default function Booth() {
   const [ready, setReady] = useState(false);
   const [lightbox, setLightbox] = useState(false);
 
-  const rootRef = useRef<HTMLDivElement>(null);
-  useParallax(rootRef, reduced);
   const session = useRef(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const photos = useRef<HTMLCanvasElement[]>([]);
@@ -529,51 +514,17 @@ export default function Booth() {
   const showCamera = screen === "frame" || screen === "capture";
 
   return (
-    <div ref={rootRef} className={`booth${reduced ? " reduced" : ""}`}>
-      <Collage variant={screen === "attract" || screen === "waking" ? "full" : "page"} />
+    <div className={`booth${reduced ? " reduced" : ""}`}>
+      <Collage variant={screen === "attract" || screen === "waking" ? "home" : "page"} />
       {(screen === "attract" || screen === "waking") && (
-        <section className={`screen attract${screen === "waking" ? " flashing" : ""}`} aria-label="Cover">
-          <Dust />
-          <header className="poster-top">
-            <span>{host.presenter}</span>
-            <i className="rule" aria-hidden="true" />
-            <span>{host.subtitle}</span>
-          </header>
-          <div className="hero" aria-hidden="true">
-            <div className="hero-film">
-              <i className="pic door" />
-              <i />
-              <i />
-              <i />
-            </div>
-            <img className="hero-camera sticker" src="/decor/camera.svg" alt="" />
-            <span className="hero-flash" />
-          </div>
-          <h1 className="poster-title">
-            {host.eventName.split(/\s+/).map((w, i) => (
-              <span key={i}>{w}</span>
-            ))}
-          </h1>
-          <dl className="poster-info">
-            <div>
-              <dt>{host.eventDate}</dt>
-              <dd>{host.eventDay}</dd>
-            </div>
-            <div>
-              <dt>{host.eventTime}</dt>
-              <dd>{host.doors}</dd>
-            </div>
-            <div>
-              <dt>{host.venue}</dt>
-              <dd>{host.city}</dd>
-            </div>
-          </dl>
-          <div className="poster-cta">
-            <SealButton onClick={openBook} disabled={screen === "waking"}>
-              {screen === "waking" ? "Loading the film…" : "Step inside"}
-            </SealButton>
-            <p className="see-you">see you in costume</p>
-          </div>
+        <section className={`screen home${screen === "waking" ? " waking" : ""}`} aria-label="Start">
+          <button type="button" className="pumpkin-start" onClick={openBook} disabled={screen === "waking"}>
+            <img src="/art/pumpkin.webp" alt="" />
+            <span className="sr-only">Start the photobooth</span>
+          </button>
+          <p className="home-hint" aria-hidden="true">
+            {screen === "waking" ? "waking the camera…" : "click the pumpkin"}
+          </p>
           <p className="privacy">Photos are kept for 48 hours so you can download them, then deleted.</p>
         </section>
       )}
@@ -589,7 +540,7 @@ export default function Booth() {
               <li><b>Safari:</b> Safari menu → Settings for This Website → Camera → <i>Allow</i>.</li>
               <li><b>macOS:</b> System Settings → Privacy &amp; Security → Camera → turn on your browser.</li>
             </ol>
-            <SealButton onClick={openBook}>Try again</SealButton>
+            <PillButton onClick={openBook}>Try again</PillButton>
           </Card>
         </section>
       )}
@@ -624,6 +575,7 @@ export default function Booth() {
             </span>
           </div>
 
+          <img className="art screen-hat" src="/art/witch-hat.webp" alt="" aria-hidden="true" />
           <Card className="side">
             {screen === "frame" ? (
               <>
@@ -633,9 +585,9 @@ export default function Booth() {
                   <p className="ready-text">Squeeze everyone inside the dashed frame and look at the camera.</p>
                 </div>
                 <div className="begin">
-                  <SealButton onClick={startCapture} disabled={capturing}>
+                  <PillButton onClick={startCapture} disabled={capturing}>
                     Begin
-                  </SealButton>
+                  </PillButton>
                   <p className="hint">or press the spacebar</p>
                   {retakesLeft === 0 && <p className="hint">This is your retake, make it count.</p>}
                 </div>
@@ -665,17 +617,17 @@ export default function Booth() {
               </div>
             )}
           </div>
+          <img className="art screen-cat" src="/art/cat-banjo.webp" alt="" aria-hidden="true" />
           <Card className="review-copy">
             <p className="kicker">Roll two · The proof</p>
             <h1 className="page-title">Is this your tale?</h1>
-            <img className="pumpkin" src="/decor/jack-o-lantern.svg" alt="" />
             <div className="review-actions">
-              <SealButton onClick={print} disabled={!strip}>
+              <PillButton onClick={print} disabled={!strip}>
                 Print my tale
-              </SealButton>
-              <SealButton onClick={retake} variant="quiet" disabled={retakesLeft < 1}>
+              </PillButton>
+              <PillButton onClick={retake} variant="quiet" disabled={retakesLeft < 1}>
                 {retakesLeft < 1 ? "Retake used" : "Retake"}
-              </SealButton>
+              </PillButton>
             </div>
             <p className="hint">
               Space to print{retakesLeft > 0 ? " · R to retake" : ""}. The press starts on its own after 30 seconds.
@@ -687,10 +639,7 @@ export default function Booth() {
       {screen === "print" && strip && (
         <section className={`screen page print${ready ? " ready" : ""}`} aria-label="Your strip">
           <div className="print-left">
-            <div className="print-props" aria-hidden="true">
-              <img className="sticker print-camera" src="/decor/camera.svg" alt="" />
-              <img className="sticker print-clock" src="/decor/clock.svg" alt="" />
-            </div>
+            <img className="art print-ghost" src="/art/ghost.webp" alt="" aria-hidden="true" />
             <div className="caption" aria-live="polite">
               {ready && (
                 <Card className="caption-card">
@@ -700,10 +649,10 @@ export default function Booth() {
                     <em>It fades in 48 hours.</em>
                   </p>
                   <div className="final-actions">
-                    <SealButton onClick={() => setLightbox(true)} variant="quiet">
+                    <PillButton onClick={() => setLightbox(true)} variant="quiet">
                       View up close
-                    </SealButton>
-                    <SealButton onClick={resetSession}>Start a new story</SealButton>
+                    </PillButton>
+                    <PillButton onClick={resetSession}>Start a new story</PillButton>
                   </div>
                 </Card>
               )}
@@ -742,7 +691,6 @@ export default function Booth() {
 
           <div className="tag-col">
             <div className="tag">
-              <i className="mtape" aria-hidden="true" />
               <div className="tag-pic">
                 {upload.status === "done" ? (
                   <div className="qr" role="img" aria-label="QR code to download your strip" dangerouslySetInnerHTML={{ __html: upload.qrSvg }} />
@@ -840,25 +788,6 @@ export default function Booth() {
           </form>
         </div>
       )}
-    </div>
-  );
-}
-
-function Dust() {
-  return (
-    <div className="dust" aria-hidden="true">
-      {Array.from({ length: 18 }, (_, i) => (
-        <i
-          key={i}
-          style={{
-            left: `${(i * 37) % 100}%`,
-            top: `${(i * 53) % 100}%`,
-            animationDuration: `${18 + ((i * 7) % 14)}s`,
-            animationDelay: `${-((i * 3) % 17)}s`,
-            opacity: 0.25 + ((i * 13) % 5) / 10,
-          }}
-        />
-      ))}
     </div>
   );
 }

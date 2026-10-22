@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 130"><defs></defs><mask id="m"><rect width="260" height="130" fill="#fff"/><circle cx="0" cy="20" r="6" fill="#000"/><circle cx="260" cy="20" r="6" fill="#000"/><circle cx="0" cy="50" r="6" fill="#000"/><circle cx="260" cy="50" r="6" fill="#000"/><circle cx="0" cy="80" r="6" fill="#000"/><circle cx="260" cy="80" r="6" fill="#000"/><circle cx="0" cy="110" r="6" fill="#000"/><circle cx="260" cy="110" r="6" fill="#000"/></mask>
-<rect width="260" height="130" fill="#9E1B1F" mask="url(#m)"/><rect x="12" y="10" width="236" height="110" fill="none" stroke="#f3e9d2" stroke-width="1.5" stroke-dasharray="4 3"/>
-<text x="130" y="56" text-anchor="middle" font-family="Georgia,serif" font-size="30" font-weight="bold" fill="#f3e9d2" letter-spacing="3">ADMIT ONE</text>
-<text x="130" y="82" text-anchor="middle" font-family="Arial Narrow,Arial,sans-serif" font-size="12" fill="#f3e9d2" letter-spacing="4">HALLOWEEN · 2026</text>
-<text x="130" y="106" text-anchor="middle" font-family="Courier New,monospace" font-size="11" fill="#f3e9d2" letter-spacing="2">No. 031031</text></svg>

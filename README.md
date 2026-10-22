@@ -4,11 +4,11 @@ A laptop photobooth that takes 3 photos, prints them as a storybook strip with a
 
 ## Look
 
-A vintage photo album with a Halloween edge. The backdrop is a black album page scattered with ephemera: a vintage camera, a record, a cassette, a clock stuck at midnight, red bows, foil stars, a ticket, a matchbox and a disco ball, plus polaroids of the haunted door and of "mr. & mrs. bones", skulls, pumpkins, bats and a witch flying past. Every photo frame is 35mm film. The live preview sits in a film frame, the captured photos fill a short length of film, and the printed strip is a film strip with a title card, the three photos and a details card, stickers on its rails. The QR comes taped into a polaroid. The party poster's red title lettering and details stay. Readable text sits on aged paper clipped over ticking and gingham fabric.
+Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. Colours come from the party palette (dark brown, greige paper, rust, pumpkin orange). Each inner screen has one piece of public-domain artwork (a witch hat, a banjo-playing black cat, a ghost holding a pumpkin), and the witch on her broom and a bat fly past now and then. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
 
-The collage lives in `src/components/Collage.tsx` and the illustrations in `public/decor/`. `npm run gen:scenery` renders the collage for the phone pages and runs before `dev` and `build`.
+Artwork lives in `public/art/`. `npm run gen:scenery` renders the phone-page artwork and runs before `dev` and `build`.
 
-Poster details (presenter, date, day, time, doors, venue, city) are editable in host settings (Shift+H).
+Party details (presenter, date, day, time, doors, venue, city) are editable in host settings (Shift+H).
 
 ## Run it
 
@@ -51,7 +51,7 @@ No database is needed: each strip's record is a small JSON object stored next to
 | `GET /api/strips/:id/image` → 10-minute signed URL, counts downloads | `src/app/api/strips/[id]/image/route.ts` |
 | Hourly cleanup | `src/app/api/cron/cleanup/route.ts` |
 | Synthesized sounds (muted by default) | `src/lib/booth/sound.ts` |
-| Album collage and stickers | `src/components/Collage.tsx`, `public/decor/` |
+| Flying artwork and phone-page artwork | `src/components/Collage.tsx`, `public/art/` |
 
 P1 items included: host event details, story-format image, Web Share, sound. Photos are taken in natural colour (the filter and chapter pickers were removed), each after a 5-second countdown.
 
