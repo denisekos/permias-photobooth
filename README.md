@@ -4,7 +4,7 @@ A laptop photobooth that takes 3 photos, prints them as a storybook strip with a
 
 ## Look
 
-Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. Colours come from the party palette (dark brown, greige paper, rust, pumpkin orange). All artwork is still: the camera screen has a witch hat, the review screen the banjo-playing black cat and a bat, and the print screen the ghost holding a pumpkin and the witch on her broom. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
+Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. Colours and fonts match the party poster: blood-red Metal Mania titles, red Oswald labels and spaced ivory serif caps on near-black brown with a faint red glow. All artwork is still: the camera screen has a witch hat, the review screen the banjo-playing black cat and a bat, and the print screen the ghost holding a pumpkin and the witch on her broom. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
 
 Artwork lives in `public/art/`. `npm run gen:scenery` renders the phone-page artwork (`src/components/Collage.tsx`) and runs before `dev` and `build`.
 

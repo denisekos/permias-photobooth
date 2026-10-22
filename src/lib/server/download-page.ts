@@ -3,17 +3,17 @@ import { SCENERY_HTML } from "./scenery-html";
 import type { StripRecord } from "./types";
 
 const FONTS =
-  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Special+Elite&family=Metal+Mania&family=Oswald:wght@500&family=Homemade+Apple&display=swap";
+  "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Metal+Mania&family=Oswald:wght@400;500&display=swap";
 
 const esc = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 // Mirrors the booth's styles in src/app/globals.css for the pieces used here.
 const CSS = `
-:root{--bg:#261D1B;--bg-deep:#170F0D;--paper:#C0BBB1;--ink:#1B1A1F;--ash:#574F44;--greige:#C0BBB1;--pumpkin:#C0622F;--rust:#4F1C10;--terracotta:#835F4F;--film:#131010;
---serif:"Cormorant Garamond",Georgia,serif;--type:"Special Elite","Courier New",monospace;--display:"Metal Mania",serif;--label:"Oswald","Arial Narrow",sans-serif;--hand:"Homemade Apple","Bradley Hand",cursive}
+:root{--bg:#1D130B;--bg-deep:#0D0704;--paper:#DCCBC4;--ink:#1B1210;--ash:#5A3F38;--greige:#D0BCB7;--pumpkin:#D70101;--rust:#9E1012;--terracotta:#B01415;--film:#120C09;
+--serif:"Cormorant Garamond",Georgia,serif;--type:"Oswald","Arial Narrow",sans-serif;--display:"Metal Mania",serif;--label:"Oswald","Arial Narrow",sans-serif}
 *{box-sizing:border-box}html,body{margin:0}html{background:var(--bg-deep)}
-body{background:radial-gradient(ellipse 80% 60% at 50% 40%,#30251F 0%,var(--bg) 55%,var(--bg-deep) 100%) fixed;color:var(--greige);font-family:var(--serif);min-height:100svh;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(ellipse 70% 30% at 50% 100%,rgba(160,10,10,.22),transparent 70%) fixed,radial-gradient(ellipse 80% 60% at 50% 40%,#2A1A10 0%,var(--bg) 55%,var(--bg-deep) 100%) fixed;color:var(--greige);font-family:var(--serif);min-height:100svh;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;background:url(/kit/parchment-texture.png) center/cover;mix-blend-mode:soft-light;opacity:.35;pointer-events:none}
 .collage{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 .art{position:absolute;height:auto;filter:drop-shadow(0 10px 12px rgba(0,0,0,.45))}
@@ -37,7 +37,7 @@ text-decoration:none;border:1.5px solid var(--ink);color:var(--ink);background:t
 .btn.primary{background:var(--rust);border-color:var(--rust);color:var(--greige)}
 .btn:active{transform:translateY(1px)}
 .note{font-size:15px;color:var(--ash);font-style:italic;margin:0;max-width:30ch}
-.costume{font-family:var(--hand);font-size:17px;color:var(--greige);margin:4px 0 0;opacity:.8}
+.costume{font-family:var(--serif);font-weight:500;font-size:13px;letter-spacing:.4em;text-transform:uppercase;color:var(--greige);margin:4px 0 0}
 .mist{padding-top:24vh}
 .mist .note{color:var(--greige)}
 `;
@@ -46,7 +46,7 @@ function shell(title: string, body: string, script = "") {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#261D1B"><title>${esc(title)}</title>
+<meta name="theme-color" content="#1D130B"><title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}"><style>${CSS}</style></head>
 <body>${SCENERY_HTML}${body}${script}</body></html>`;

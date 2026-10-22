@@ -27,18 +27,17 @@ export const PHOTO_RECTS = PHOTO_Y.map((y) => ({
 
 // colours from the party palette
 const FILM = "#131010";
-const HOLE = "#D8D3C9";
-const CARD = "#D3CEC4";
-const EDGE_INK = "#C0622F";
+const HOLE = "#D0BCB7";
+const CARD = "#DCCBC4";
+const EDGE_INK = "#B01415";
 const INK = "#1B1A1F";
-const PUMPKIN = "#B5531F";
-const RUST = "#4F1C10";
-const BG = "#261D1B";
+const PUMPKIN = "#D70101";
+const RUST = "#5E0606";
+const BG = "#1D130B";
 
 const SERIF = '"Cormorant Garamond", "IM Fell English", Georgia, serif';
 const DISPLAY = '"Metal Mania", "Cormorant Garamond", serif';
 const LABEL = '"Oswald", "Arial Narrow", sans-serif';
-const HAND = '"Homemade Apple", "Bradley Hand", cursive';
 
 const images = new Map<string, Promise<HTMLImageElement>>();
 export function loadImage(src: string): Promise<HTMLImageElement> {
@@ -68,7 +67,6 @@ export async function preloadAssets() {
     document.fonts?.load(`500 26px ${SERIF}`),
     document.fonts?.load(`100px ${DISPLAY}`),
     document.fonts?.load(`500 30px ${LABEL}`),
-    document.fonts?.load(`30px ${HAND}`),
   ]).catch(() => {});
 }
 
@@ -267,8 +265,8 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   });
   ctx.restore();
   ctx.fillStyle = INK;
-  ctx.font = `30px ${HAND}`;
-  ctx.fillText("a night of costumes, music & surprises", STRIP_W / 2, TITLE_Y + CARD_H - 52);
+  ctx.font = `600 24px ${SERIF}`;
+  spaced(ctx, "A NIGHT OF COSTUMES, MUSIC & SURPRISES", STRIP_W / 2, TITLE_Y + CARD_H - 52, 6);
 
   photos.forEach((p, i) => drawPhoto(ctx, p, PHOTO_Y[i]));
 
@@ -283,8 +281,8 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   ctx.fillStyle = INK;
   ctx.font = `500 28px ${SERIF}`;
   spaced(ctx, [host.eventDay, host.city].filter(Boolean).join(" · ").toUpperCase(), STRIP_W / 2, fy + 222, 7);
-  ctx.font = `36px ${HAND}`;
-  ctx.fillText("see you in costume", STRIP_W / 2, fy + 320);
+  ctx.font = `600 30px ${SERIF}`;
+  spaced(ctx, "SEE YOU IN COSTUME", STRIP_W / 2, fy + 320, 14);
   sticker(ctx, pumpkin, STRIP_W / 2, fy + 470, 220, -3);
 
   edgePrint(ctx, [TITLE_Y, ...PHOTO_Y, FOOTER_Y]);
@@ -318,8 +316,8 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   ctx.drawImage(paper, 0, 0, W, H);
   ctx.restore();
   const glow = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, W);
-  glow.addColorStop(0, "rgba(48, 37, 31, 0.6)");
-  glow.addColorStop(1, "rgba(15, 9, 8, 0.6)");
+  glow.addColorStop(0, "rgba(120, 10, 8, 0.25)");
+  glow.addColorStop(1, "rgba(8, 4, 2, 0.65)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
@@ -338,9 +336,9 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   sticker(ctx, cat, 920, 1530, 230, 4);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#C0BBB1";
-  ctx.font = `34px ${HAND}`;
-  ctx.fillText(`${host.presenter} · ${host.subtitle}`.toLowerCase(), W / 2, H - 50);
+  ctx.fillStyle = "#D0BCB7";
+  ctx.font = `600 30px ${SERIF}`;
+  spaced(ctx, "SEE YOU IN COSTUME", W / 2, H - 56, 14);
   return c;
 }
 
