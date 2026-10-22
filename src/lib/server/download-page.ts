@@ -19,13 +19,19 @@ body::before{content:"";position:fixed;inset:0;background:url(/kit/parchment-tex
 .scenery{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 .scn-layer{position:absolute}.scn-layer>svg{display:block;width:100%;height:100%}
 .scn-stars{inset:0}.scn-fill{width:100%;height:100%}
-.scn-top{top:-8px;left:-20px;right:-20px;height:15vh}
+.scn-top{top:calc(-8px - 4vh);left:-20px;right:-20px;height:19vh}
 .scn-bottom{bottom:-8px;left:-20px;right:-20px;height:16vh}
 .scn-col{top:-20px;bottom:-20px;width:var(--col-w)}.scn-col.left{left:-14px}.scn-col.right{right:-14px}.scn-col.right>svg{transform:scaleX(-1)}
 .scn-hangers{inset:0}
 .hang{position:absolute;top:0;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);transform-origin:50% 0;animation:sway 5s ease-in-out infinite alternate}
 .hang .thread{width:1px;background:#A88A4E}.hang img,.hang svg{display:block;margin-top:-2px;max-width:42px;height:auto}
 @keyframes sway{from{transform:translateX(-50%) rotate(-3.5deg)}to{transform:translateX(-50%) rotate(3.5deg)}}
+.sticker{filter:drop-shadow(2px 0 0 #F5EFE3) drop-shadow(-2px 0 0 #F5EFE3) drop-shadow(0 2px 0 #F5EFE3) drop-shadow(0 -2px 0 #F5EFE3)}
+.scn-top.tall{height:calc(19vh * 400 / 240)}.scn-night{inset:0}
+.witch-fly{position:absolute;top:13vh;left:0;width:120px;animation:fly 26s linear infinite}.witch-fly img{width:100%;display:block}
+@keyframes fly{0%{transform:translateX(-160px)}100%{transform:translateX(calc(100vw + 160px))}}
+.bat{position:absolute}.bat img{width:100%;display:block;filter:drop-shadow(1.5px 0 0 #F5EFE3) drop-shadow(-1.5px 0 0 #F5EFE3) drop-shadow(0 1.5px 0 #F5EFE3) drop-shadow(0 -1.5px 0 #F5EFE3);animation:flap .32s ease-in-out infinite alternate}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.45)}}
 .twinkle{animation:twinkle 4.2s ease-in-out infinite}@keyframes twinkle{0%,100%{opacity:1}50%{opacity:.35}}
 main{position:relative;z-index:1;width:100%;max-width:440px;margin:0 auto;padding:11vh calc(var(--col-w) + 6px) 18vh;display:flex;flex-direction:column;align-items:center;text-align:center;gap:20px}
 .placard{background:rgba(27,26,31,.9);border:1px solid rgba(168,138,78,.8);box-shadow:inset 0 0 0 4px rgba(27,26,31,.9),inset 0 0 0 5px rgba(168,138,78,.45),0 10px 24px rgba(0,0,0,.5);
@@ -54,7 +60,7 @@ text-decoration:none;border:1.5px solid var(--ink);color:var(--ink);background:t
 .haze{position:fixed;inset:auto 0 0 0;height:45vh;pointer-events:none;z-index:1;
 background:radial-gradient(60% 50% at 30% 100%,rgba(245,239,227,.55),transparent 70%),radial-gradient(60% 50% at 75% 100%,rgba(245,239,227,.45),transparent 70%)}
 @media (prefers-reduced-motion:no-preference){.haze{animation:drift 14s ease-in-out infinite alternate}}
-@media (prefers-reduced-motion:reduce){.hang,.twinkle{animation:none}}
+@media (prefers-reduced-motion:reduce){.hang,.twinkle,.witch-fly,.bat img{animation:none}.witch-fly{transform:translateX(55vw)}}
 @keyframes drift{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
 `;
 

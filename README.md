@@ -4,7 +4,7 @@ A laptop photobooth that takes 3 photos, prints them as a storybook strip with a
 
 ## Look
 
-Every screen sits inside a layered paper-cut theatre (`src/components/Scenery.tsx`): a starry, velvet-textured night sky, scalloped valances and side columns cut from engraved parchment, lace strips, a paper town along the bottom, hanging stars, lanterns, moths and a moon, and pumpkin hot-air balloons. Layers drift with the cursor (parallax). Anything guests need to read sits on a scalloped parchment panel or a dark placard. The phone pages use the same scenery: `npm run gen:scenery` renders it to `src/lib/server/scenery-html.ts`, and runs automatically before `dev` and `build`.
+Every screen sits inside a layered paper-cut theatre (`src/components/Scenery.tsx`): a starry, velvet-textured night sky, scalloped valances and side columns cut from engraved parchment, lace strips, a paper town along the bottom, hanging stars, lanterns, moths and a moon, and pumpkin hot-air balloons, plus Victorian Halloween pieces drawn as die-cut scrapbook stickers held on with washi tape: a skeleton lady with a lace parasol and pearls, a skeleton gentleman in a top hat, a candelabra, a gramophone, skulls and a witch's hat. Pearl strands and ivory gauze drape the valance, cobwebs fill the corners, bats flap and a witch flies past the moon (`public/decor/`). Layers drift with the cursor (parallax). Anything guests need to read sits on a scalloped parchment panel or a dark placard. The phone pages use the same scenery: `npm run gen:scenery` renders it to `src/lib/server/scenery-html.ts`, and runs automatically before `dev` and `build`.
 
 ## Run it
 

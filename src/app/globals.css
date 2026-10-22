@@ -100,6 +100,8 @@ img {
 
 .scn-stars { inset: -24px; }
 .scn-top { top: -14px; left: -30px; right: -30px; height: 25vh; }
+.scn-top.tall { height: calc(25vh * 400 / 240); }
+.scn-night { inset: 0; }
 .scn-bottom { bottom: -14px; left: -30px; right: -30px; height: 28vh; }
 .scn-col { top: -20px; bottom: -20px; width: var(--col-w); }
 .scn-col.left { left: -22px; }
@@ -1612,6 +1614,164 @@ img {
 }
 
 /* working screens keep the theatre a little shallower so the camera and strip have room */
-.scenery.page .scn-top { height: 19vh; }
+/* raise the valance rather than shrinking it, so its scalloped edge is never cropped */
+.scenery.page .scn-top { top: calc(-14px - 6vh); }
 .scenery.page .scn-bottom { height: 22vh; }
 .scenery.page .scn-col { width: calc(var(--col-w) * 0.8); }
+
+/* ---------- halloween scrapbook pieces ---------- */
+
+/* die-cut sticker: ivory outline traced around the drawing, then a soft drop shadow */
+.sticker {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter:
+    drop-shadow(2.5px 0 0 #f5efe3) drop-shadow(-2.5px 0 0 #f5efe3)
+    drop-shadow(0 2.5px 0 #f5efe3) drop-shadow(0 -2.5px 0 #f5efe3)
+    drop-shadow(0 8px 10px rgba(0, 0, 0, 0.45));
+}
+
+.taped {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.tape {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 64px;
+  height: 20px;
+  margin-left: -32px;
+  transform: rotate(-8deg);
+  opacity: 0.88;
+  clip-path: polygon(0 8%, 6% 0, 12% 10%, 18% 0, 24% 8%, 100% 0, 96% 15%, 100% 30%, 95% 45%, 100% 60%, 96% 78%, 100% 100%, 0 100%, 4% 82%, 0 64%, 5% 46%, 0 28%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.tape.rose { background: repeating-linear-gradient(45deg, rgba(142, 44, 44, 0.75) 0 6px, rgba(233, 223, 201, 0.75) 6px 12px); }
+.tape.gold { background: repeating-linear-gradient(90deg, rgba(168, 138, 78, 0.8) 0 4px, rgba(245, 239, 227, 0.7) 4px 9px); }
+.tape.ink { background: radial-gradient(circle at 5px 5px, rgba(245, 239, 227, 0.8) 1.5px, transparent 2px) 0 0 / 10px 10px, rgba(27, 26, 31, 0.82); }
+
+.fig {
+  z-index: 3;
+}
+
+.fig.lady {
+  height: auto;
+  width: calc(46vh * 340 / 484);
+  bottom: 3vh;
+  left: calc(50% - min(78vh, 720px) * 0.34 - 22px - 46vh * 340 / 484 + 30px);
+  transform: rotate(-3deg);
+}
+
+.fig.gent {
+  width: calc(48vh * 240 / 460);
+  bottom: 3vh;
+  right: calc(50% - min(78vh, 720px) * 0.34 - 22px - 48vh * 240 / 460 + 10px);
+  transform: rotate(2.5deg);
+}
+
+.fig.candelabra {
+  width: calc(22vh * 160 / 230);
+  bottom: 2.5vh;
+  left: calc(50% - min(78vh, 720px) * 0.34 - 22px - 46vh * 340 / 484 - 60px);
+  transform: rotate(-6deg);
+}
+
+.fig.gramophone {
+  width: calc(19vh * 200 / 210);
+  bottom: 2vh;
+  right: calc(50% - min(78vh, 720px) * 0.34 - 22px - 48vh * 240 / 460 - 120px);
+  transform: rotate(5deg);
+}
+
+.attract-balloon {
+  top: 12vh;
+}
+
+.attract-balloon.small {
+  top: 22vh;
+}
+
+.mat-skull { width: 74px; top: -26px; left: -30px; transform: rotate(-14deg); }
+.mat-hat { width: 96px; bottom: -22px; right: -36px; transform: rotate(10deg); }
+.mat-web { position: absolute; width: 120px; top: -6px; right: -6px; transform: scaleX(-1); z-index: 4; pointer-events: none; opacity: 0.9; }
+
+.gilt-web { position: absolute; width: 120px; top: -12px; left: -12px; z-index: 4; pointer-events: none; }
+
+.panel-skull { width: 58px; top: -30px; right: -22px; transform: rotate(12deg); }
+
+.review-gent {
+  width: calc(46vh * 240 / 460);
+  right: 8vw;
+  bottom: 3vh;
+  transform: rotate(3deg);
+}
+
+.candle-row {
+  position: relative;
+  align-items: flex-end;
+}
+
+.print-candelabra { position: relative; width: 150px; transform: rotate(-4deg); }
+.print-skull { position: relative; width: 70px; transform: rotate(10deg); margin-bottom: 6px; }
+.caption-hat { width: 82px; top: -40px; left: -40px; transform: rotate(-12deg); }
+
+/* witch crossing the sky */
+.witch-fly {
+  position: absolute;
+  top: 17vh;
+  left: 0;
+  width: 190px;
+  animation: fly 34s linear infinite;
+  filter: drop-shadow(0 0 6px rgba(201, 174, 114, 0.45));
+}
+
+.witch-fly img {
+  width: 100%;
+  display: block;
+  animation: bob 3.2s ease-in-out infinite;
+}
+
+@keyframes fly {
+  0% { transform: translateX(-260px); }
+  100% { transform: translateX(calc(100vw + 260px)); }
+}
+
+.bat {
+  position: absolute;
+  animation: bat-drift 9s ease-in-out infinite alternate;
+}
+
+.bat img {
+  width: 100%;
+  display: block;
+  transform-origin: 50% 40%;
+  animation: flap 0.32s ease-in-out infinite alternate;
+  filter: drop-shadow(1.5px 0 0 #f5efe3) drop-shadow(-1.5px 0 0 #f5efe3) drop-shadow(0 1.5px 0 #f5efe3) drop-shadow(0 -1.5px 0 #f5efe3);
+}
+
+@keyframes flap {
+  from { transform: scaleY(1); }
+  to { transform: scaleY(0.45); }
+}
+
+@keyframes bat-drift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(40px, -18px); }
+}
+
+.reduced .witch-fly,
+.reduced .witch-fly img,
+.reduced .bat,
+.reduced .bat img {
+  animation: none;
+}
+
+.reduced .witch-fly {
+  transform: translateX(62vw);
+}

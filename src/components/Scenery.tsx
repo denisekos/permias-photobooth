@@ -62,6 +62,11 @@ export function SceneryDefs() {
           <stop offset="0.5" stopColor="#C9AE72" />
           <stop offset="1" stopColor="#A88A4E" />
         </linearGradient>
+        <radialGradient id="sum-pearl" cx="0.35" cy="0.35" r="0.7">
+          <stop offset="0" stopColor="#FFFDF7" />
+          <stop offset="0.6" stopColor="#EDE3CC" />
+          <stop offset="1" stopColor="#B9A882" />
+        </radialGradient>
         <symbol id="sum-rose" viewBox="-20 -20 40 40" overflow="visible">
           {Array.from({ length: 8 }, (_, i) => {
             const a = (i / 8) * Math.PI * 2;
@@ -157,6 +162,67 @@ const VAL_BACK = valance(70, 150, 1.4, 5, 56);
 const VAL_MID = valance(46, 128, 1.7, 9, 44);
 const VAL_FRONT = valance(18, 96, 2.2, 13, 34);
 
+/** y of a scalloped edge at x, by linear interpolation between its points. */
+function edgeY(pts: Pt[], x: number) {
+  for (let i = 1; i < pts.length; i++) {
+    if (pts[i][0] >= x) {
+      const [x0, y0] = pts[i - 1];
+      const [x1, y1] = pts[i];
+      return y0 + ((y1 - y0) * (x - x0)) / (x1 - x0 || 1);
+    }
+  }
+  return pts[pts.length - 1][1];
+}
+
+/** Pearl strands swagged between anchor points along the front valance, with drops at each anchor. */
+const PEARLS = (() => {
+  const anchors = [150, 440, 720, 1000, 1290].map((x) => [x, edgeY(VAL_FRONT.pts, x) - 6] as Pt);
+  const beads: { x: number; y: number; r: number }[] = [];
+  for (const [sag, r, gap] of [[46, 4.2, 10], [86, 5, 12]] as const) {
+    for (let i = 1; i < anchors.length; i++) {
+      const [x0, y0] = anchors[i - 1];
+      const [x1, y1] = anchors[i];
+      const n = Math.round(Math.hypot(x1 - x0, y1 - y0) / gap);
+      for (let k = 1; k < n; k++) {
+        const t = k / n;
+        beads.push({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t + sag * 4 * t * (1 - t), r });
+      }
+    }
+  }
+  const drops = anchors.flatMap(([x, y]) => Array.from({ length: 6 }, (_, k) => ({ x, y: y + 4 + k * 9, r: k === 5 ? 6.5 : 3.6 })));
+  return { beads: [...beads, ...drops], anchors };
+})();
+
+const GAUZE =
+  "M-40 -20 L300 -20 C270 30 200 64 160 130 C130 180 110 250 92 330 C80 316 70 322 60 340 C52 326 40 330 28 352 C16 336 0 344 -40 360 Z";
+
+function Pearls() {
+  return (
+    <g filter="url(#sum-cast)">
+      {PEARLS.beads.map((b, i) => (
+        <circle key={i} cx={f(b.x)} cy={f(b.y)} r={b.r} fill="url(#sum-pearl)" stroke="#A88A4E" strokeWidth="0.5" />
+      ))}
+      {PEARLS.anchors.map(([x, y], i) => (
+        <use key={i} href="#sum-rose" x={f(x - 13)} y={f(y - 15)} width="26" height="26" />
+      ))}
+    </g>
+  );
+}
+
+function Gauze({ flip }: { flip?: boolean }) {
+  return (
+    <g transform={flip ? "translate(1440 0) scale(-1 1)" : undefined} opacity="0.85">
+      <path d={GAUZE} fill="#F5EFE3" opacity="0.38" />
+      <g stroke="#F5EFE3" strokeWidth="0.7" opacity="0.6" fill="none">
+        {Array.from({ length: 9 }, (_, i) => (
+          <path key={i} d={`M${20 + i * 30} -10 C${10 + i * 22} 80 ${i * 14} 200 ${-10 + i * 10} ${330 - i * 6}`} />
+        ))}
+      </g>
+      <image href="/decor/web.svg" x="70" y="40" width="150" height="150" opacity="0.9" />
+    </g>
+  );
+}
+
 function Valance() {
   const roses = VAL_FRONT.pts.filter((_, i) => i % 5 === 2 && i > 2 && i < VAL_FRONT.pts.length - 3);
   return (
@@ -174,9 +240,12 @@ function Valance() {
           ))}
         </svg>
       </Layer>
-      <Layer depth={14} className="scn-top">
-        <svg viewBox="0 0 1440 240" preserveAspectRatio="xMidYMin slice">
+      <Layer depth={14} className="scn-top tall">
+        <svg viewBox="0 0 1440 400" preserveAspectRatio="xMidYMin slice">
           <Paper d={VAL_FRONT.d} tone="light" />
+          <Gauze />
+          <Gauze flip />
+          <Pearls />
           {roses.map(([x, y], i) => (
             <g key={i}>
               <use href="#sum-leaf" x={f(x - 36)} y={f(y - 12)} width="34" height="14" transform={`rotate(150 ${f(x - 18)} ${f(y - 4)})`} />
@@ -346,22 +415,34 @@ function Town({ pumpkins = true }: { pumpkins?: boolean }) {
 
 /* ---------- hanging ornaments ---------- */
 
-type Hang = { left: number; len: number; kind: "moon" | "star" | "lantern" | "moth"; size: number; dur: number };
+type Hang = {
+  left: number;
+  len: number;
+  kind: "moon" | "star" | "lantern" | "moth" | "skull";
+  size: number;
+  dur: number;
+  page?: boolean;
+};
 
 const HANGS: Hang[] = [
-  { left: 9, len: 26, kind: "star", size: 34, dur: 5.1 },
+  { left: 9, len: 26, kind: "star", size: 34, dur: 5.1, page: true },
+  { left: 12.5, len: 44, kind: "skull", size: 40, dur: 6.6, page: true },
   { left: 15, len: 38, kind: "lantern", size: 46, dur: 6.3 },
-  { left: 22, len: 24, kind: "star", size: 24, dur: 4.4 },
+  { left: 22, len: 24, kind: "star", size: 24, dur: 4.4, page: true },
+  { left: 26, len: 46, kind: "skull", size: 34, dur: 5.4 },
   { left: 29, len: 32, kind: "moth", size: 64, dur: 7.2 },
   { left: 71, len: 24, kind: "star", size: 28, dur: 4.8 },
+  { left: 74, len: 46, kind: "skull", size: 34, dur: 6.1 },
   { left: 78, len: 40, kind: "moon", size: 84, dur: 6.8 },
-  { left: 86, len: 24, kind: "star", size: 30, dur: 5.6 },
-  { left: 92, len: 35, kind: "lantern", size: 40, dur: 5.9 },
+  { left: 86, len: 24, kind: "star", size: 30, dur: 5.6, page: true },
+  { left: 89, len: 46, kind: "skull", size: 38, dur: 5.2, page: true },
+  { left: 92, len: 35, kind: "lantern", size: 40, dur: 5.9, page: true },
 ];
 
 function Ornament({ kind, size }: { kind: Hang["kind"]; size: number }) {
   if (kind === "moon") return <img src="/kit/crescent-moon.svg" alt="" style={{ width: size }} />;
   if (kind === "moth") return <img src="/kit/moth.svg" alt="" style={{ width: size }} />;
+  if (kind === "skull") return <img src="/decor/skull.svg" alt="" style={{ width: size }} className="sticker" />;
   if (kind === "star")
     return (
       <svg width={size} height={size} viewBox="-10 -10 20 20">
@@ -380,10 +461,10 @@ function Ornament({ kind, size }: { kind: Hang["kind"]; size: number }) {
   );
 }
 
-function Hangers({ only }: { only?: number[] }) {
+function Hangers({ page }: { page: boolean }) {
   return (
     <Layer depth={12} className="scn-hangers">
-      {HANGS.filter((_, i) => !only || only.includes(i)).map((h, i) => (
+      {HANGS.filter((h) => !page || h.page).map((h, i) => (
         <div
           key={i}
           className="hang"
@@ -391,6 +472,30 @@ function Hangers({ only }: { only?: number[] }) {
         >
           <span className="thread" style={{ height: `${h.len}vh` }} />
           <Ornament kind={h.kind} size={h.size} />
+        </div>
+      ))}
+    </Layer>
+  );
+}
+
+const BATS = [
+  { left: 34, top: 30, w: 46, page: false },
+  { left: 39, top: 24, w: 30, page: false },
+  { left: 63, top: 27, w: 40, page: true },
+  { left: 18, top: 52, w: 34, page: false },
+  { left: 84, top: 56, w: 44, page: true },
+];
+
+/** A witch crossing the sky every half minute, and a colony of bats. */
+function Night({ page }: { page: boolean }) {
+  return (
+    <Layer depth={7} className="scn-night">
+      <div className="witch-fly">
+        <img src="/decor/witch.svg" alt="" />
+      </div>
+      {BATS.filter((b) => !page || b.page).map((b, i) => (
+        <div key={i} className="bat" style={{ left: `${b.left}%`, top: `${b.top}vh`, width: b.w, animationDelay: `${-i * 1.7}s` }}>
+          <img src="/decor/bat.svg" alt="" style={{ animationDelay: `${-i * 0.13}s` }} />
         </div>
       ))}
     </Layer>
@@ -428,7 +533,8 @@ export default function Scenery({ variant = "full" }: { variant?: SceneryVariant
       <Town pumpkins={variant === "full"} />
       <Column side="left" />
       <Column side="right" />
-      <Hangers only={variant === "page" ? [0, 2, 6, 7] : undefined} />
+      <Hangers page={variant === "page"} />
+      <Night page={variant === "page"} />
       <Valance />
     </div>
   );

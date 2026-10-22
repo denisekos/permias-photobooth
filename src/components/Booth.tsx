@@ -80,6 +80,16 @@ function FrameCorners() {
   );
 }
 
+/** A die-cut scrapbook sticker, optionally held on with a strip of washi tape. */
+function Sticker({ src, className, tape }: { src: string; className: string; tape?: "rose" | "gold" | "ink" }) {
+  return (
+    <span className={`taped ${className}`} aria-hidden="true">
+      <img className="sticker" src={src} alt="" />
+      {tape && <i className={`tape ${tape}`} />}
+    </span>
+  );
+}
+
 function Quill() {
   return (
     <svg className="quill" viewBox="0 0 120 60" aria-hidden="true">
@@ -482,15 +492,16 @@ export default function Booth() {
       {(screen === "attract" || screen === "waking") && (
         <section className="screen attract" aria-label="Cover">
           <Dust />
-          <div className="candle-stand left" aria-hidden="true">
-            <Candle />
-          </div>
-          <div className="candle-stand right" aria-hidden="true">
-            <Candle small />
-          </div>
           <Balloon className="attract-balloon" />
           <Balloon className="attract-balloon small" />
+          <Sticker src="/decor/skeleton-lady.svg" className="fig lady" />
+          <Sticker src="/decor/skeleton-gent.svg" className="fig gent" />
+          <Sticker src="/decor/candelabra.svg" className="fig candelabra" />
+          <Sticker src="/decor/gramophone.svg" className="fig gramophone" />
           <div className="panel cover-mat">
+            <Sticker src="/decor/skull.svg" className="mat-skull" tape="rose" />
+            <Sticker src="/decor/witch-hat.svg" className="mat-hat" tape="gold" />
+            <img className="mat-web" src="/decor/web.svg" alt="" aria-hidden="true" />
             <div className="cover">
               <FrameCorners />
               <p className="cover-kicker">A storybook photobooth</p>
@@ -543,6 +554,7 @@ export default function Booth() {
 
           <div className="gilt">
             <FrameCorners />
+            <img className="gilt-web" src="/decor/web.svg" alt="" aria-hidden="true" />
             <div className="mat">
               <video ref={attachVideo} className="live" style={previewStyle} playsInline muted autoPlay />
               <div className="guide" aria-hidden="true">
@@ -557,6 +569,7 @@ export default function Booth() {
           </div>
 
           <aside className="side panel">
+            <Sticker src="/decor/skull.svg" className="panel-skull" tape="ink" />
             {screen === "frame" ? (
               <>
                 <fieldset className="choices">
@@ -628,7 +641,9 @@ export default function Booth() {
             )}
           </div>
           <Balloon className="review-balloon" />
+          <Sticker src="/decor/skeleton-gent.svg" className="fig review-gent" />
           <div className="review-copy panel">
+            <Sticker src="/decor/skull.svg" className="panel-skull" tape="rose" />
             <p className="kicker">Chapter two · The proof</p>
             <h1 className="page-title">
               Is this your <em>tale?</em>
@@ -653,12 +668,13 @@ export default function Booth() {
         <section className={`screen page print${ready ? " ready" : ""}`} aria-label="Your strip">
           <div className="print-left">
             <div className="candle-row" aria-hidden="true">
-              <Candle />
-              <Candle small />
+              <Sticker src="/decor/candelabra.svg" className="print-candelabra" />
+              <Sticker src="/decor/skull.svg" className="print-skull" tape="gold" />
             </div>
             <div className="caption" aria-live="polite">
               {ready && (
                 <div className="panel caption-panel">
+                  <Sticker src="/decor/witch-hat.svg" className="caption-hat" tape="rose" />
                   <p className="caption-text">
                     Scan to keep your story.
                     <br />
@@ -799,16 +815,6 @@ export default function Booth() {
           </form>
         </div>
       )}
-    </div>
-  );
-}
-
-function Candle({ small }: { small?: boolean }) {
-  return (
-    <div className={`candle${small ? " small" : ""}`}>
-      <span className="glow" />
-      <img src="/kit/candle.svg" alt="" />
-      <span className="flame-flicker" />
     </div>
   );
 }
