@@ -23,7 +23,7 @@ The camera works on `localhost` or HTTPS only. QR codes point to `PUBLIC_BASE_UR
 1. Create a **private** bucket. Add a lifecycle rule that deletes objects older than **2 days** (this is the backstop; the app itself enforces 48 hours).
 2. Create an access key limited to that bucket.
 3. In Vercel, set the env vars from `.env.example` with `STORAGE_DRIVER=s3`, plus the `S3_*` values, `PUBLIC_BASE_URL`, `SIGNING_SECRET` and `CRON_SECRET`.
-4. Deploy. `vercel.json` registers the hourly cleanup cron (`/api/cron/cleanup`).
+4. Deploy. `vercel.json` registers a daily cleanup cron (`/api/cron/cleanup`), the most often Vercel's Hobby plan allows. Expiry is still exact: every request checks `expires_at`, and the bucket rule removes files after 2 days. On Vercel Pro you can change the schedule to hourly (`0 * * * *`).
 
 `STORAGE_DRIVER=local` writes to `./.data`. Use it for development, or for a single always-on server. It does not work on serverless.
 
