@@ -18,6 +18,12 @@ const REVIEW_AUTOPRINT_MS = 30_000;
 const FINAL_IDLE_MS = 60_000;
 const UPLOAD_RETRY_MS = 5_000;
 const UPLOAD_TIMEOUT_MS = 20_000;
+
+/** The server's plain-text reason, or "" for an HTML error page from the platform. */
+async function serverText(res: Response): Promise<string> {
+  const text = (await res.text().catch(() => "")).trim();
+  return text.startsWith("<") ? "" : text.slice(0, 240);
+}
 const PRINT_MS = 6_400;
 const PRINT_MS_REDUCED = 1_600;
 
@@ -339,11 +345,14 @@ export default function Booth() {
               if (token === session.current) setUpload({ status: "done", url, qrSvg });
               return;
             }
-            if (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 408) {
-              if (token === session.current) setUpload({ status: "error", message: await res.text() });
+            const fatal = res.headers.get("x-booth-fatal") === "1";
+            if (fatal || (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 408)) {
+              const message = (await serverText(res)) || `HTTP ${res.status}`;
+              if (token === session.current) setUpload({ status: "error", message });
               return;
             }
             if (res.status === 429) reason = "too many tales at once";
+            else reason = (await serverText(res)) || `server error ${res.status}`;
           } catch {
             if (uploadManual.current) reason = "retrying";
             else if (ctrl.signal.aborted) reason = "the press is slow";
@@ -683,6 +692,7 @@ export default function Booth() {
                 ) : upload.status === "error" ? (
                   <div className="qr waiting">
                     <p className="tag-wait">The press refused this one.</p>
+                    <p className="tag-why">{upload.message}</p>
                     <button type="button" className="reload-qr" onClick={reloadQr}>↻ Reload QR</button>
                     <button type="button" className="text-btn" onClick={saveLocally}>Save on this laptop</button>
                   </div>

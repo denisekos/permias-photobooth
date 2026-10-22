@@ -10,10 +10,10 @@ const esc = (s: string) =>
 
 // Mirrors the booth's styles in src/app/globals.css for the pieces used here.
 const CSS = `
-:root{--bg:#1D130B;--bg-deep:#0D0704;--paper:#DCCBC4;--ink:#1B1210;--ash:#5A3F38;--greige:#D0BCB7;--pumpkin:#D70101;--rust:#9E1012;--terracotta:#B01415;--film:#120C09;
+:root{--bg:#261D1B;--bg-deep:#170F0D;--paper:#C0BBB1;--ink:#1B1A1F;--ash:#574F44;--greige:#C0BBB1;--pumpkin:#C0622F;--rust:#4F1C10;--terracotta:#B5531F;--film:#131010;
 --serif:"Cormorant Garamond",Georgia,serif;--type:"Oswald","Arial Narrow",sans-serif;--display:"Metal Mania",serif;--label:"Oswald","Arial Narrow",sans-serif}
 *{box-sizing:border-box}html,body{margin:0}html{background:var(--bg-deep)}
-body{background:radial-gradient(ellipse 70% 30% at 50% 100%,rgba(160,10,10,.22),transparent 70%) fixed,radial-gradient(ellipse 80% 60% at 50% 40%,#2A1A10 0%,var(--bg) 55%,var(--bg-deep) 100%) fixed;color:var(--greige);font-family:var(--serif);min-height:100svh;-webkit-font-smoothing:antialiased}
+body{background:radial-gradient(ellipse 80% 60% at 50% 40%,#30251F 0%,var(--bg) 55%,var(--bg-deep) 100%) fixed;color:var(--greige);font-family:var(--serif);min-height:100svh;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;background:url(/kit/parchment-texture.png) center/cover;mix-blend-mode:soft-light;opacity:.35;pointer-events:none}
 .collage{position:fixed;inset:0;pointer-events:none;overflow:hidden}
 .art{position:absolute;height:auto;filter:drop-shadow(0 10px 12px rgba(0,0,0,.45))}
@@ -46,7 +46,7 @@ function shell(title: string, body: string, script = "") {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#1D130B"><title>${esc(title)}</title>
+<meta name="theme-color" content="#261D1B"><title>${esc(title)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONTS}"><style>${CSS}</style></head>
 <body>${SCENERY_HTML}${body}${script}</body></html>`;

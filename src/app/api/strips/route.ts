@@ -1,5 +1,5 @@
 import { customAlphabet } from "nanoid";
-import { MAX_UPLOAD_BYTES, RETENTION_MS, baseUrlFor, config } from "@/lib/server/config";
+import { MAX_UPLOAD_BYTES, RETENTION_MS, baseUrlFor, config, storageProblem } from "@/lib/server/config";
 import { clientIp, rateLimit } from "@/lib/server/rate-limit";
 import { cleanupExpired, store } from "@/lib/server/store";
 import type { StoredFile, StripRecord } from "@/lib/server/types";
@@ -29,7 +29,13 @@ async function readImage(form: FormData, field: string): Promise<{ body: Buffer;
 
 let lastLocalSweep = 0;
 
+/** A setup problem the booth shouldn't retry; it shows the message instead. */
+const fatal = (message: string) => new Response(message, { status: 503, headers: { "x-booth-fatal": "1" } });
+
 export async function POST(req: Request) {
+  const problem = storageProblem();
+  if (problem) return fatal(problem);
+
   const device = req.headers.get("x-booth-device")?.slice(0, 64) || "none";
   const ip = clientIp(req);
   if (!rateLimit("upload-device", device, 12, 60_000) || !rateLimit("upload-ip", ip, 20, 60_000)) {
@@ -67,7 +73,17 @@ export async function POST(req: Request) {
     download_count: 0,
     view_count: 0,
   };
-  await store.create(record, files);
+  try {
+    await store.create(record, files);
+  } catch (err) {
+    const e = err as { name?: string; message?: string; Code?: string };
+    console.error("store.create failed", err);
+    const why = `${e.name || "Error"}: ${e.message || e.Code || "unknown"}`.slice(0, 200);
+    // Bad keys, a wrong bucket or endpoint won't fix themselves.
+    if (/AccessDenied|InvalidAccessKeyId|SignatureDoesNotMatch|NoSuchBucket|EROFS|EACCES|ENOTFOUND/i.test(why))
+      return fatal(`Storage refused the upload (${why}). Check the S3_* settings in Vercel.`);
+    return new Response(`Storage error (${why})`, { status: 502 });
+  }
 
   // Local driver has no Vercel cron; sweep opportunistically.
   if (config.storageDriver === "local" && created - lastLocalSweep > 10 * 60_000) {

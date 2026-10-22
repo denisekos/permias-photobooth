@@ -4,7 +4,7 @@ A laptop photobooth that takes 3 photos, prints them as a storybook strip with a
 
 ## Look
 
-Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. Colours and fonts match the party poster: blood-red Metal Mania titles, red Oswald labels and spaced ivory serif caps on near-black brown with a faint red glow. All artwork is still: the camera screen has a witch hat, the review screen the banjo-playing black cat and a bat, and the print screen the ghost holding a pumpkin and the witch on her broom. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
+Pencil and paper, kept simple. The home screen is a single vintage pumpkin on a plain dark-brown ground; clicking it starts the booth. The fonts match the party poster (Metal Mania titles, Oswald labels, spaced serif caps), lettered in pumpkin orange on dark brown. All artwork is still: the camera screen has a witch hat, the review screen the banjo-playing black cat and a bat, and the print screen the ghost holding a pumpkin and the witch on her broom. Every photo frame is 35mm film: the live preview, the captured photos, and the printed strip, which also has a title frame and a details frame. The QR comes in a polaroid.
 
 Artwork lives in `public/art/`. `npm run gen:scenery` renders the phone-page artwork (`src/components/Collage.tsx`) and runs before `dev` and `build`.
 
@@ -25,7 +25,7 @@ The camera works on `localhost` or HTTPS only. QR codes point to `PUBLIC_BASE_UR
 1. Create a **private** bucket. Add a lifecycle rule that deletes objects older than **2 days** (this is the backstop; the app itself enforces 48 hours).
 2. Create an access key limited to that bucket.
 3. In Vercel, set the env vars from `.env.example` with `STORAGE_DRIVER=s3`, plus the `S3_*` values, `PUBLIC_BASE_URL`, `SIGNING_SECRET` and `CRON_SECRET`.
-4. Deploy. `vercel.json` registers a daily cleanup cron (`/api/cron/cleanup`), the most often Vercel's Hobby plan allows. Expiry is still exact: every request checks `expires_at`, and the bucket rule removes files after 2 days. On Vercel Pro you can change the schedule to hourly (`0 * * * *`).
+4. Deploy. Then open `https://<your-site>/api/health`: it should say `"ok": true`. If it names a problem, fix that environment variable and redeploy. `vercel.json` registers a daily cleanup cron (`/api/cron/cleanup`), the most often Vercel's Hobby plan allows. Expiry is still exact: every request checks `expires_at`, and the bucket rule removes files after 2 days. On Vercel Pro you can change the schedule to hourly (`0 * * * *`).
 
 `STORAGE_DRIVER=local` writes to `./.data`. Use it for development, or for a single always-on server. It does not work on serverless.
 

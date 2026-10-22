@@ -27,13 +27,13 @@ export const PHOTO_RECTS = PHOTO_Y.map((y) => ({
 
 // colours from the party palette
 const FILM = "#131010";
-const HOLE = "#D0BCB7";
-const CARD = "#DCCBC4";
-const EDGE_INK = "#B01415";
+const HOLE = "#D8D3C9";
+const CARD = "#D3CEC4";
+const EDGE_INK = "#C0622F";
 const INK = "#1B1A1F";
-const PUMPKIN = "#D70101";
-const RUST = "#5E0606";
-const BG = "#1D130B";
+const PUMPKIN = "#B5531F";
+const RUST = "#4F1C10";
+const BG = "#261D1B";
 
 const SERIF = '"Cormorant Garamond", "IM Fell English", Georgia, serif';
 const DISPLAY = '"Metal Mania", "Cormorant Garamond", serif';
@@ -316,8 +316,8 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   ctx.drawImage(paper, 0, 0, W, H);
   ctx.restore();
   const glow = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, W);
-  glow.addColorStop(0, "rgba(120, 10, 8, 0.25)");
-  glow.addColorStop(1, "rgba(8, 4, 2, 0.65)");
+  glow.addColorStop(0, "rgba(48, 37, 31, 0.6)");
+  glow.addColorStop(1, "rgba(15, 9, 8, 0.6)");
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
@@ -336,7 +336,7 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
   sticker(ctx, cat, 920, 1530, 230, 4);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#D0BCB7";
+  ctx.fillStyle = "#C0BBB1";
   ctx.font = `600 30px ${SERIF}`;
   spaced(ctx, "SEE YOU IN COSTUME", W / 2, H - 56, 14);
   return c;

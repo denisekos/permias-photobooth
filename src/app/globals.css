@@ -1,23 +1,22 @@
 /* =====================================================================
-   The party poster's type and colour: Metal Mania titles in blood red,
-   Oswald labels in a deeper red, letter-spaced serif capitals in warm
-   ivory, on a plain near-black brown with a red glow. A few pieces of
-   still public-domain artwork and 35mm film for every photo frame.
+   The party poster's type in pumpkin orange: Metal Mania titles, Oswald
+   labels and letter-spaced serif capitals on a plain dark-brown ground.
+   A few pieces of still public-domain artwork and 35mm film for every
+   photo frame.
    ===================================================================== */
 
 :root {
-  /* sampled from the party poster */
-  --bg: #1d130b;
-  --bg-deep: #0d0704;
-  --paper: #dccbc4;
-  --ink: #1b1210;
-  --ash: #5a3f38;
-  --greige: #d0bcb7;
-  --pumpkin: #d70101;
-  --rust: #9e1012;
-  --terracotta: #b01415;
-  --film: #120c09;
-  --edge: #b01415;
+  --bg: #261d1b;
+  --bg-deep: #170f0d;
+  --paper: #c0bbb1;
+  --ink: #1b1a1f;
+  --ash: #574f44;
+  --greige: #c0bbb1;
+  --pumpkin: #c0622f;
+  --rust: #4f1c10;
+  --terracotta: #b5531f;
+  --film: #131010;
+  --edge: #c0622f;
 
   --serif: "Cormorant Garamond", "IM Fell English", Georgia, serif;
   --type: "Oswald", "Arial Narrow", sans-serif;
@@ -73,9 +72,7 @@ img {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 55% 35% at 50% 100%, rgba(160, 10, 10, 0.22), transparent 70%),
-    radial-gradient(ellipse 70% 60% at 50% 45%, #2a1a10 0%, var(--bg) 55%, var(--bg-deep) 100%);
+  background: radial-gradient(ellipse 70% 60% at 50% 45%, #30251f 0%, var(--bg) 55%, var(--bg-deep) 100%);
 }
 
 .booth::before {
@@ -427,7 +424,7 @@ img {
   font-variant-numeric: lining-nums;
   line-height: 1;
   color: var(--greige);
-  text-shadow: 0 4px 0 #000, 0 0 30px rgba(215, 1, 1, 0.85), 0 0 60px rgba(215, 1, 1, 0.45);
+  text-shadow: 0 4px 0 #000, 0 0 30px rgba(192, 98, 47, 0.9), 0 0 60px rgba(192, 98, 47, 0.5);
   animation: count-pop 1s ease-out both;
 }
 
@@ -761,7 +758,7 @@ img {
   top: 30%;
   height: 40%;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(215, 1, 1, 0.9), transparent 70%);
+  background: radial-gradient(ellipse, rgba(192, 98, 47, 0.9), transparent 70%);
   opacity: 0;
   animation: whirr 1.2s ease-out forwards;
 }
@@ -902,6 +899,16 @@ img {
   padding: 14px;
   background: transparent;
   border: 1px dashed var(--ash);
+}
+
+.tag-why {
+  margin: 0;
+  max-width: 30ch;
+  font-family: var(--label);
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ash);
+  overflow-wrap: anywhere;
 }
 
 .tag-wait {

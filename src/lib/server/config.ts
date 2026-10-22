@@ -27,3 +27,28 @@ export function baseUrlFor(req: Request): string {
   const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || url.host;
   return `${proto}://${host}`;
 }
+
+/**
+ * Why uploads can't work with the current environment, or null if storage looks configured.
+ * Vercel's disk is read-only and per-instance, so the local driver can't work there.
+ */
+export function storageProblem(): string | null {
+  if (config.storageDriver === "local") {
+    return process.env.VERCEL
+      ? "Storage isn't set up: on Vercel, set STORAGE_DRIVER=s3 and the S3_* variables, then redeploy."
+      : null;
+  }
+  const missing = (
+    [
+      ["S3_BUCKET", config.s3.bucket],
+      ["S3_ACCESS_KEY_ID", config.s3.accessKeyId],
+      ["S3_SECRET_ACCESS_KEY", config.s3.secretAccessKey],
+    ] as const
+  )
+    .filter(([, v]) => !v)
+    .map(([k]) => k);
+  if (missing.length) return `Storage isn't set up: missing ${missing.join(", ")}. Add them in Vercel, then redeploy.`;
+  if (config.s3.endpoint && !/^https:\/\/[^/]+\/?$/.test(config.s3.endpoint))
+    return "S3_ENDPOINT should look like https://<account-id>.r2.cloudflarestorage.com (no bucket name or path).";
+  return null;
+}
