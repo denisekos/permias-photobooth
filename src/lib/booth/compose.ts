@@ -288,9 +288,9 @@ export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCa
   edgePrint(ctx, [TITLE_Y, ...PHOTO_Y, FOOTER_Y]);
 
   // a few pieces of artwork on the rails, clear of faces
-  sticker(ctx, bat, STRIP_W - RAIL - 30, TITLE_Y + CARD_H + 6, 260, -8);
-  sticker(ctx, ghost, RAIL + 4, PHOTO_Y[2] - 4, 170, -6);
-  sticker(ctx, hat, STRIP_W - RAIL - 20, PHOTO_Y[2] + SLOT_H + 14, 250, 10);
+  sticker(ctx, bat, STRIP_W - RAIL - 10, TITLE_Y + CARD_H + 6, 380, -8);
+  sticker(ctx, ghost, RAIL, PHOTO_Y[2] - 4, 250, -6);
+  sticker(ctx, hat, STRIP_W - RAIL + 10, PHOTO_Y[2] + SLOT_H - 50, 360, 10);
 
   return c;
 }

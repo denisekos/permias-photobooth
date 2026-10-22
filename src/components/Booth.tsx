@@ -614,10 +614,10 @@ export default function Booth() {
           <img className="art screen-bat" src="/art/bat.webp" alt="" aria-hidden="true" />
           <Card className="review-copy">
             <p className="kicker">Roll two · The proof</p>
-            <h1 className="page-title">Is this your tale?</h1>
+            <h1 className="page-title">Hurry, sebelum Uber menjemput!</h1>
             <div className="review-actions">
               <PillButton onClick={print} disabled={!strip}>
-                Print my tale
+                Print my Photo
               </PillButton>
               <PillButton onClick={retake} variant="quiet" disabled={retakesLeft < 1}>
                 {retakesLeft < 1 ? "Retake used" : "Retake"}
@@ -647,7 +647,7 @@ export default function Booth() {
                     <PillButton onClick={() => setLightbox(true)} variant="quiet">
                       View up close
                     </PillButton>
-                    <PillButton onClick={resetSession}>Start a new story</PillButton>
+                    <PillButton onClick={resetSession}>Start a New Photo Booth</PillButton>
                   </div>
                 </Card>
               )}
