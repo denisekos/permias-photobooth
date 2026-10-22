@@ -23,7 +23,7 @@ There is no linter config and no test suite in the repo. Verify changes with `np
 **One client component runs the booth.** `src/components/Booth.tsx` is a state machine over screens: `attract → waking → frame → capture → review → print`, plus `denied` when camera access is refused. Async flows (countdown and capture, upload retries) take a `session` token and stop by throwing `Cancelled` once `resetSession()` bumps it. Read `resetSession` before adding state: every reset must stop camera tracks, revoke object URLs and zero canvases (`width = 0`), because the kiosk has to run 200+ sessions without leaking memory. Timers on screens: review prints automatically after 30 s idle; the final screen returns to the cover after 60 s idle, but only once the upload has succeeded or failed (it waits while still retrying).
 
 **Images are made in the browser, not on the server.**
-- `src/lib/booth/photo.ts`: grabs a frame, center-crops it to 4:3, keeps it unmirrored (the live preview is unmirrored too, so it matches the saved photo), and applies the dark-room brightness gain. Natural colour; there are no filters.
+- `src/lib/booth/photo.ts`: grabs a frame, center-crops it to 4:3, mirrors it (the live preview is mirrored with CSS too, so the saved photo matches what guests saw), and applies the dark-room brightness gain. Natural colour; there are no filters.
 - `src/lib/booth/compose.ts`: draws the strip as a length of 35mm film (sprocket rails, edge numbers, a paper title card, the three photos, a details card, and a few pieces of artwork on the rails) and the 1080 × 1920 story image. Exports `PHOTO_RECTS`, which the print animation uses to position the "develop" overlays. Colours come from the party palette constants at the top. The strip is encoded as PNG, or JPEG 0.9 if the PNG is over 2.5 MB; the story is always JPEG. Strip plus story must stay under Vercel's 4.5 MB request body limit. Canvas text needs the web fonts loaded first (`preloadAssets`).
 
 **Upload and expiry (server).** All handlers use the Node runtime.
@@ -50,7 +50,7 @@ There is no linter config and no test suite in the repo. Verify changes with `np
 ## Product constraints
 
 These come from the PRD and the party:
-- Photos are saved unmirrored, and decorations on the strip must not cover faces; talismans sit on the outer margins.
+- Photos are saved mirrored, matching the live preview (the host asked for this over the PRD, which said unmirrored), and decorations on the strip must not cover faces; talismans sit on the outer margins.
 - There is no QR code on the strip itself; the QR shows only on the print screen.
 - Raw individual frames never leave the laptop; only the composite and the story image are uploaded.
 - Default target is 1440 × 900 at full screen, and it must still work at 1280 × 800.

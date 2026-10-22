@@ -14,8 +14,9 @@ export function applyGain(data: Uint8ClampedArray, gain: number) {
 }
 
 /**
- * Grabs one frame: center-crops the feed to 4:3, keeps it unmirrored (so costume text reads
- * correctly), and brightens it for dark rooms. Returns a 1080 × 810 canvas.
+ * Grabs one frame: center-crops the feed to 4:3, mirrors it to match the live preview (the host
+ * wants guests to see themselves as in a mirror), and brightens it for dark rooms.
+ * Returns a 1080 × 810 canvas.
  */
 export function grabPhoto(video: HTMLVideoElement, gain: number): HTMLCanvasElement {
   const vw = video.videoWidth;
@@ -32,7 +33,9 @@ export function grabPhoto(video: HTMLVideoElement, gain: number): HTMLCanvasElem
   c.width = PHOTO_W;
   c.height = PHOTO_H;
   const ctx = c.getContext("2d", { willReadFrequently: true })!;
+  ctx.setTransform(-1, 0, 0, 1, PHOTO_W, 0);
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, PHOTO_W, PHOTO_H);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   const img = ctx.getImageData(0, 0, PHOTO_W, PHOTO_H);
   applyGain(img.data, gain);
   ctx.putImageData(img, 0, 0);
