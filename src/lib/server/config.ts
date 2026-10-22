@@ -13,7 +13,7 @@ export const config = {
   s3: {
     bucket: process.env.S3_BUCKET || "",
     region: process.env.S3_REGION || "auto",
-    endpoint: process.env.S3_ENDPOINT || undefined,
+    endpoint: process.env.S3_ENDPOINT?.trim() || undefined,
     accessKeyId: process.env.S3_ACCESS_KEY_ID || "",
     secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || "",
   },
@@ -48,6 +48,8 @@ export function storageProblem(): string | null {
     .filter(([, v]) => !v)
     .map(([k]) => k);
   if (missing.length) return `Storage isn't set up: missing ${missing.join(", ")}. Add them in Vercel, then redeploy.`;
+  if (!config.s3.endpoint && config.s3.region === "auto")
+    return "S3_ENDPOINT is missing: set it to https://<account-id>.r2.cloudflarestorage.com, then redeploy.";
   if (config.s3.endpoint && !/^https:\/\/[^/]+\/?$/.test(config.s3.endpoint))
     return "S3_ENDPOINT should look like https://<account-id>.r2.cloudflarestorage.com (no bucket name or path).";
   return null;
