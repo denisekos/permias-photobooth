@@ -4,17 +4,7 @@ import QRCode from "qrcode";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PHOTO_RECTS, composeStory, composeStrip, encode, encodeJpeg, preloadAssets } from "@/lib/booth/compose";
 import { gainFor, ghostOf, grabPhoto, sampleLuminance } from "@/lib/booth/photo";
-import {
-  CHAPTERS,
-  DEFAULT_HOST,
-  FILTERS,
-  deviceId,
-  loadHost,
-  saveHost,
-  type ChapterId,
-  type FilterId,
-  type HostSettings,
-} from "@/lib/booth/settings";
+import { DEFAULT_HOST, deviceId, loadHost, saveHost, type HostSettings } from "@/lib/booth/settings";
 import * as sound from "@/lib/booth/sound";
 import Scenery, { SceneryDefs } from "./Scenery";
 import { useParallax } from "./useParallax";
@@ -115,8 +105,6 @@ export default function Booth() {
   const [hostOpen, setHostOpen] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
 
-  const [filter, setFilter] = useState<FilterId>("candle");
-  const [chapter, setChapter] = useState<ChapterId>("raven");
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [gain, setGain] = useState(1);
 
@@ -140,14 +128,12 @@ export default function Booth() {
   const stripBlob = useRef<Blob | null>(null);
   const storyBlob = useRef<Promise<Blob | null> | null>(null);
   const gainRef = useRef(1);
-  const filterRef = useRef<FilterId>("candle");
   const capturingRef = useRef(false);
   const printingRef = useRef(false);
   const uploadRunning = useRef(false);
   const uploadInflight = useRef<AbortController | null>(null);
   const uploadWake = useRef<(() => void) | null>(null);
   const uploadManual = useRef(false);
-  filterRef.current = filter;
   gainRef.current = gain;
 
   useEffect(() => {
@@ -214,8 +200,6 @@ export default function Booth() {
     setUpload({ status: "idle" });
     setReady(false);
     setLightbox(false);
-    setFilter("candle");
-    setChapter("raven");
     setGain(1);
     goTo("attract");
   }, [goTo]);
@@ -269,7 +253,7 @@ export default function Booth() {
 
   const buildStrip = useCallback(
     async (token: number) => {
-      const canvas = await composeStrip({ photos: photos.current, chapter, host });
+      const canvas = await composeStrip({ photos: photos.current, host });
       const blob = await encode(canvas);
       if (token !== session.current) {
         canvas.width = 0;
@@ -288,7 +272,7 @@ export default function Booth() {
           canvas.width = 0;
         });
     },
-    [chapter, host],
+    [host],
   );
 
   const startCapture = useCallback(async () => {
@@ -304,7 +288,7 @@ export default function Booth() {
       while (video.videoWidth === 0) await sleep(100, token);
       for (let i = 0; i < 3; i++) {
         setShotIndex(i);
-        for (const n of [3, 2, 1]) {
+        for (const n of [5, 4, 3, 2, 1]) {
           setCountdown(n);
           sound.tick();
           await sleep(1000, token);
@@ -312,7 +296,7 @@ export default function Booth() {
         setCountdown(null);
         setFlash(true);
         await sleep(170, token); // let the flash light the room before the frame is grabbed
-        const photo = grabPhoto(video, filterRef.current, gainRef.current);
+        const photo = grabPhoto(video, gainRef.current);
         sound.shutter();
         photos.current.push(photo);
         setShots((s) => [...s, photo.toDataURL("image/jpeg", 0.8)]);
@@ -544,8 +528,7 @@ export default function Booth() {
     if ("soundOn" in patch) setSoundOn(Boolean(patch.soundOn));
   };
 
-  const filterCss = FILTERS.find((f) => f.id === filter)!.css;
-  const previewStyle = { filter: `${filterCss} brightness(${gain})` };
+  const previewStyle = { filter: `brightness(${gain})` };
   const showCamera = screen === "frame" || screen === "capture";
 
   return (
@@ -658,45 +641,16 @@ export default function Booth() {
             <Sticker src="/decor/skull.svg" className="panel-skull" tape="ink" />
             {screen === "frame" ? (
               <>
-                <fieldset className="choices">
-                  <legend>Choose your chapter</legend>
-                  <div className="chapters">
-                    {CHAPTERS.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        className={`chapter${chapter === c.id ? " on" : ""}`}
-                        aria-pressed={chapter === c.id}
-                        onClick={() => setChapter(c.id)}
-                      >
-                        <img src={`/kit/${c.motif}.svg`} alt="" />
-                        <span>{c.title}</span>
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
-                <fieldset className="choices">
-                  <legend>Choose your light</legend>
-                  <div className="filters">
-                    {FILTERS.map((f) => (
-                      <button
-                        key={f.id}
-                        type="button"
-                        className={`chip f-${f.id}${filter === f.id ? " on" : ""}`}
-                        aria-pressed={filter === f.id}
-                        onClick={() => setFilter(f.id)}
-                      >
-                        <i aria-hidden="true" />
-                        {f.name}
-                      </button>
-                    ))}
-                  </div>
-                </fieldset>
+                <div className="ready-note">
+                  <p className="kicker">Strike a pose</p>
+                  <p className="ready-text">Three portraits, with a five-second countdown before each one.</p>
+                  <p className="ready-text">Squeeze everyone inside the dashed frame and look at the camera.</p>
+                </div>
                 <div className="begin">
                   <SealButton onClick={startCapture} disabled={capturing}>
                     Begin
                   </SealButton>
-                  <p className="hint">or press the spacebar · three portraits, three seconds each</p>
+                  <p className="hint">or press the spacebar</p>
                   {retakesLeft === 0 && <p className="hint">This is your retake, make it count.</p>}
                 </div>
               </>

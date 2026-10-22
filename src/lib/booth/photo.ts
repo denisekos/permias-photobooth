@@ -1,46 +1,23 @@
-import type { FilterId } from "./settings";
-
 export const PHOTO_W = 1080;
 export const PHOTO_H = 810;
 
 const clamp = (v: number) => (v < 0 ? 0 : v > 255 ? 255 : v);
 
-/** Applies one of the three looks plus an exposure gain, in place. Pixel math so it matches across browsers. */
-export function applyFilter(data: Uint8ClampedArray, filter: FilterId, gain: number) {
+/** Applies the dark-room exposure gain in place, leaving the colours natural. */
+export function applyGain(data: Uint8ClampedArray, gain: number) {
+  if (gain === 1) return;
   for (let i = 0; i < data.length; i += 4) {
-    let r = data[i] * gain;
-    let g = data[i + 1] * gain;
-    let b = data[i + 2] * gain;
-    const l = 0.299 * r + 0.587 * g + 0.114 * b;
-    if (filter === "moonlit") {
-      const c = (l - 128) * 1.12 + 128;
-      r = c * 0.98 + 2;
-      g = c * 0.99 + 2;
-      b = c * 1.03 + 4;
-    } else if (filter === "parchment") {
-      const c = (l - 128) * 1.05 + 128;
-      r = 18 + (c * 1.07 + 10) * 0.92;
-      g = 18 + (c * 0.95 + 4) * 0.92;
-      b = 18 + c * 0.74 * 0.92;
-    } else {
-      r = l + (r - l) * 0.7;
-      g = l + (g - l) * 0.7;
-      b = l + (b - l) * 0.7;
-      r = 10 + (r * 1.06 + 6) * 0.95;
-      g = 10 + (g + 2) * 0.95;
-      b = 10 + b * 0.86 * 0.95;
-    }
-    data[i] = clamp(r);
-    data[i + 1] = clamp(g);
-    data[i + 2] = clamp(b);
+    data[i] = clamp(data[i] * gain);
+    data[i + 1] = clamp(data[i + 1] * gain);
+    data[i + 2] = clamp(data[i + 2] * gain);
   }
 }
 
 /**
  * Grabs one frame: center-crops the feed to 4:3, keeps it unmirrored (so costume text reads
- * correctly), and bakes in the filter. Returns a 1080 × 810 canvas.
+ * correctly), and brightens it for dark rooms. Returns a 1080 × 810 canvas.
  */
-export function grabPhoto(video: HTMLVideoElement, filter: FilterId, gain: number): HTMLCanvasElement {
+export function grabPhoto(video: HTMLVideoElement, gain: number): HTMLCanvasElement {
   const vw = video.videoWidth;
   const vh = video.videoHeight;
   const target = PHOTO_W / PHOTO_H;
@@ -57,7 +34,7 @@ export function grabPhoto(video: HTMLVideoElement, filter: FilterId, gain: numbe
   const ctx = c.getContext("2d", { willReadFrequently: true })!;
   ctx.drawImage(video, sx, sy, sw, sh, 0, 0, PHOTO_W, PHOTO_H);
   const img = ctx.getImageData(0, 0, PHOTO_W, PHOTO_H);
-  applyFilter(img.data, filter, gain);
+  applyGain(img.data, gain);
   ctx.putImageData(img, 0, 0);
   return c;
 }

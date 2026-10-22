@@ -51,7 +51,7 @@ No database is needed: each strip's record is a small JSON object stored next to
 | Synthesized sounds (muted by default) | `src/lib/booth/sound.ts` |
 | Paper-cut scenery, balloons, hanging ornaments | `src/components/Scenery.tsx`, `public/decor/` |
 
-P1 items included: filters, three chapters (The Raven, The Masquerade, The Midnight Garden), host event name and date, story-format image, Web Share, sound.
+P1 items included: host event details, story-format image, Web Share, sound. Photos are taken in natural colour (the filter and chapter pickers were removed), each after a 5-second countdown.
 
 ## Behaviour worth knowing
 

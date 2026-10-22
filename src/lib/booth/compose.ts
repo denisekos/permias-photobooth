@@ -1,5 +1,5 @@
 import { PHOTO_H, PHOTO_W } from "./photo";
-import { CHAPTERS, type ChapterId, type HostSettings } from "./settings";
+import type { HostSettings } from "./settings";
 
 export const STRIP_W = 1200;
 export const STRIP_H = 3600;
@@ -227,13 +227,11 @@ function tape(ctx: CanvasRenderingContext2D, cx: number, cy: number, w: number, 
 
 export interface StripInput {
   photos: HTMLCanvasElement[];
-  chapter: ChapterId;
   host: HostSettings;
 }
 
 /** Composites the 1200 × 3600 strip in the party poster's style. No QR on it. */
-export async function composeStrip({ photos, chapter, host }: StripInput): Promise<HTMLCanvasElement> {
-  const ch = CHAPTERS.find((c) => c.id === chapter) ?? CHAPTERS[0];
+export async function composeStrip({ photos, host }: StripInput): Promise<HTMLCanvasElement> {
   const [paper, seal, talY, talW, talR, skull, web] = await Promise.all([
     loadImage("/kit/parchment-texture.png"),
     loadImage("/kit/wax-seal-blank.svg"),
@@ -265,7 +263,7 @@ export async function composeStrip({ photos, chapter, host }: StripInput): Promi
   wall(ctx, paper, STRIP_W, STRIP_H);
   ctx.restore();
 
-  // header: presenter ◆ label, the event title in poster lettering, chapter
+  // header: presenter ◆ label, then the event title in poster lettering
   ctx.drawImage(web, M - 10, M - 10, 170, 170);
   ctx.save();
   ctx.scale(-1, 1);
@@ -278,7 +276,7 @@ export async function composeStrip({ photos, chapter, host }: StripInput): Promi
   diamondRule(ctx, STRIP_W / 2, M + 62, 110);
 
   ctx.save();
-  ctx.translate(STRIP_W / 2, M + 236);
+  ctx.translate(STRIP_W / 2, M + 262);
   ctx.rotate((-2 * Math.PI) / 180);
   fitFont(ctx, host.eventName.toUpperCase(), (px) => `${px}px ${DISPLAY}`, 112, 1000);
   ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
@@ -292,10 +290,6 @@ export async function composeStrip({ photos, chapter, host }: StripInput): Promi
   ctx.fillStyle = BLOOD;
   ctx.fillText(host.eventName.toUpperCase(), 0, 0);
   ctx.restore();
-
-  ctx.fillStyle = BONE;
-  ctx.font = `500 28px ${LABEL}`;
-  spaced(ctx, `CHAPTER ${ch.numeral} · ${ch.title.toUpperCase()}`, STRIP_W / 2, M + 330, 8);
 
   photos.forEach((p, i) => drawPhoto(ctx, p, M, PHOTO_Y[i]));
 
@@ -316,18 +310,16 @@ export async function composeStrip({ photos, chapter, host }: StripInput): Promi
   ctx.fillStyle = BLOOD;
   const when = [host.eventDate, host.eventTime, host.venue].filter(Boolean).join("  ·  ").toUpperCase();
   fitFont(ctx, when, (px) => `500 ${px}px ${LABEL}`, 46, 1020);
-  ctx.fillText(when, STRIP_W / 2, fy + 140);
+  ctx.fillText(when, STRIP_W / 2, fy + 150);
   ctx.fillStyle = BONE;
   ctx.font = `500 26px ${SERIF}`;
-  spaced(ctx, [host.eventDay, host.city].filter(Boolean).join(" · ").toUpperCase(), STRIP_W / 2, fy + 188, 7);
-  ctx.font = `italic 500 40px ${SERIF}`;
-  ctx.fillText(ch.line, STRIP_W / 2, fy + 256);
+  spaced(ctx, [host.eventDay, host.city].filter(Boolean).join(" · ").toUpperCase(), STRIP_W / 2, fy + 202, 7);
   ctx.font = `500 28px ${SERIF}`;
-  spaced(ctx, "SEE YOU IN COSTUME", STRIP_W / 2, fy + 320, 12);
-  drawSeal(ctx, seal, STRIP_W / 2, fy + 352, 150);
-  sticker(ctx, skull, STRIP_W / 2 - 250, fy + 380, 110, -12);
-  sticker(ctx, tals[0], STRIP_W / 2 + 190, fy + 350, 60, 10);
-  tape(ctx, STRIP_W / 2 + 220, fy + 356, 80, 4, BLOOD_DK);
+  spaced(ctx, "SEE YOU IN COSTUME", STRIP_W / 2, fy + 276, 12);
+  drawSeal(ctx, seal, STRIP_W / 2, fy + 316, 160);
+  sticker(ctx, skull, STRIP_W / 2 - 250, fy + 340, 110, -12);
+  sticker(ctx, tals[0], STRIP_W / 2 + 190, fy + 310, 60, 10);
+  tape(ctx, STRIP_W / 2 + 220, fy + 316, 80, 4, BLOOD_DK);
 
   return c;
 }

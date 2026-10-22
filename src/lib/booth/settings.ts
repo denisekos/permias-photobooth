@@ -1,24 +1,3 @@
-export type FilterId = "moonlit" | "parchment" | "candle";
-export type ChapterId = "raven" | "masquerade" | "garden";
-
-export const FILTERS: { id: FilterId; name: string; css: string }[] = [
-  { id: "moonlit", name: "Moonlit Silver", css: "grayscale(1) contrast(1.12)" },
-  { id: "parchment", name: "Old Parchment", css: "sepia(0.85) contrast(1.05)" },
-  { id: "candle", name: "Candlelight", css: "saturate(0.72) sepia(0.22)" },
-];
-
-export const CHAPTERS: {
-  id: ChapterId;
-  title: string;
-  numeral: string;
-  motif: "raven" | "crescent-moon" | "moth";
-  line: string;
-}[] = [
-  { id: "raven", title: "The Raven", numeral: "I", motif: "raven", line: "Quoth the raven, nevermore." },
-  { id: "masquerade", title: "The Masquerade", numeral: "II", motif: "crescent-moon", line: "Unmasked only by moonlight." },
-  { id: "garden", title: "The Midnight Garden", numeral: "III", motif: "moth", line: "Where the moths keep watch." },
-];
-
 export interface HostSettings {
   eventName: string;
   presenter: string;
