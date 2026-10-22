@@ -62,7 +62,7 @@ export function grabPhoto(video: HTMLVideoElement, filter: FilterId, gain: numbe
   return c;
 }
 
-/** Small flat-sepia version shown before the strip "develops". */
+/** Small, nearly black version shown before the strip "develops" out of the dark. */
 export function ghostOf(photo: HTMLCanvasElement): string {
   const c = document.createElement("canvas");
   c.width = 216;
@@ -73,10 +73,10 @@ export function ghostOf(photo: HTMLCanvasElement): string {
   const d = img.data;
   for (let i = 0; i < d.length; i += 4) {
     const l = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-    const v = 196 + (l - 128) * 0.12;
-    d[i] = v * 1.04;
-    d[i + 1] = v * 0.97;
-    d[i + 2] = v * 0.82;
+    const v = 44 + (l - 128) * 0.1;
+    d[i] = v * 1.35;
+    d[i + 1] = v * 0.8;
+    d[i + 2] = v * 0.72;
   }
   ctx.putImageData(img, 0, 0);
   const url = c.toDataURL("image/jpeg", 0.7);

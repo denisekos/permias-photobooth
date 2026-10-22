@@ -16,8 +16,7 @@ import {
   type HostSettings,
 } from "@/lib/booth/settings";
 import * as sound from "@/lib/booth/sound";
-import NightScene from "./NightScene";
-import Scenery, { Balloon, SceneryDefs } from "./Scenery";
+import Scenery, { SceneryDefs } from "./Scenery";
 import { useParallax } from "./useParallax";
 
 type Screen = "attract" | "waking" | "denied" | "frame" | "capture" | "review" | "print";
@@ -492,29 +491,52 @@ export default function Booth() {
       {(screen === "attract" || screen === "waking") && (
         <section className="screen attract" aria-label="Cover">
           <Dust />
-          <Balloon className="attract-balloon" />
-          <Balloon className="attract-balloon small" />
+          <header className="poster-top">
+            <span>{host.presenter}</span>
+            <i className="rule" aria-hidden="true" />
+            <span>{host.subtitle}</span>
+          </header>
           <Sticker src="/decor/skeleton-lady.svg" className="fig lady" />
           <Sticker src="/decor/skeleton-gent.svg" className="fig gent" />
           <Sticker src="/decor/candelabra.svg" className="fig candelabra" />
           <Sticker src="/decor/gramophone.svg" className="fig gramophone" />
-          <div className="panel cover-mat">
-            <Sticker src="/decor/skull.svg" className="mat-skull" tape="rose" />
-            <Sticker src="/decor/witch-hat.svg" className="mat-hat" tape="gold" />
-            <img className="mat-web" src="/decor/web.svg" alt="" aria-hidden="true" />
-            <div className="cover">
-              <FrameCorners />
-              <p className="cover-kicker">A storybook photobooth</p>
-              <div className="window">
-                <NightScene still={reduced} />
-              </div>
-              <h1 className="cover-title">Sebelum Uber Menjemput</h1>
-              <p className="cover-script">{host.subtitle}</p>
-              <div className="cover-rule" aria-hidden="true"><i /></div>
-              <SealButton onClick={openBook} disabled={screen === "waking"}>
-                {screen === "waking" ? "Waking the camera…" : "Open the book"}
-              </SealButton>
+          <div className={`door-wrap${screen === "waking" ? " opening" : ""}`} aria-hidden="true">
+            <span className="door-glow" />
+            <img className="door" src="/decor/door.svg" alt="" />
+            <Sticker src="/decor/talisman-yellow.svg" className="tal t1" tape="ink" />
+            <Sticker src="/decor/talisman-white.svg" className="tal t2" tape="rose" />
+            <Sticker src="/decor/talisman-red.svg" className="tal t3" tape="gold" />
+            <Sticker src="/decor/talisman-yellow.svg" className="tal t4" tape="rose" />
+            <Sticker src="/decor/talisman-white.svg" className="tal t5" tape="ink" />
+            <Sticker src="/decor/talisman-red.svg" className="tal t6" />
+            <Sticker src="/decor/skull.svg" className="door-skull" tape="gold" />
+            <Sticker src="/decor/witch-hat.svg" className="door-hat" tape="rose" />
+            <img className="door-web" src="/decor/web.svg" alt="" />
+          </div>
+          <h1 className="poster-title">
+            {host.eventName.split(/\s+/).map((w, i) => (
+              <span key={i}>{w}</span>
+            ))}
+          </h1>
+          <dl className="poster-info">
+            <div>
+              <dt>{host.eventDate}</dt>
+              <dd>{host.eventDay}</dd>
             </div>
+            <div>
+              <dt>{host.eventTime}</dt>
+              <dd>{host.doors}</dd>
+            </div>
+            <div>
+              <dt>{host.venue}</dt>
+              <dd>{host.city}</dd>
+            </div>
+          </dl>
+          <div className="poster-cta">
+            <SealButton onClick={openBook} disabled={screen === "waking"}>
+              {screen === "waking" ? "The door creaks open…" : "Open the door"}
+            </SealButton>
+            <p className="see-you">See you in costume</p>
           </div>
           <p className="privacy">Photos are kept for 48 hours so you can download them, then deleted.</p>
         </section>
@@ -640,7 +662,7 @@ export default function Booth() {
               </div>
             )}
           </div>
-          <Balloon className="review-balloon" />
+          <Sticker src="/decor/talisman-red.svg" className="tal review-tal" tape="gold" />
           <Sticker src="/decor/skeleton-gent.svg" className="fig review-gent" />
           <div className="review-copy panel">
             <Sticker src="/decor/skull.svg" className="panel-skull" tape="rose" />
@@ -786,17 +808,26 @@ export default function Booth() {
           <form className="host" onClick={(e) => e.stopPropagation()} onSubmit={(e) => { e.preventDefault(); setHostOpen(false); }}>
             <h2>Host settings</h2>
             <label>
-              Event name (strip footer)
+              Event name (title on the cover and strip)
               <input value={host.eventName} onChange={(e) => updateHost({ eventName: e.target.value })} maxLength={48} />
             </label>
-            <label>
-              Date (after “Chapter I ·”)
-              <input value={host.eventDate} onChange={(e) => updateHost({ eventDate: e.target.value })} maxLength={40} />
-            </label>
-            <label>
-              Subtitle (cover and strip header)
-              <input value={host.subtitle} onChange={(e) => updateHost({ subtitle: e.target.value })} maxLength={40} />
-            </label>
+            {(
+              [
+                ["presenter", "Presented by (top left)"],
+                ["subtitle", "Top right label"],
+                ["eventDate", "Date"],
+                ["eventDay", "Day"],
+                ["eventTime", "Time"],
+                ["doors", "Doors line"],
+                ["venue", "Venue"],
+                ["city", "City"],
+              ] as const
+            ).map(([key, label]) => (
+              <label key={key}>
+                {label}
+                <input value={host[key]} onChange={(e) => updateHost({ [key]: e.target.value })} maxLength={48} />
+              </label>
+            ))}
             <label className="check">
               <input type="checkbox" checked={host.soundOn} onChange={(e) => updateHost({ soundOn: e.target.checked })} />
               Sound on by default

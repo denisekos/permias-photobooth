@@ -29,16 +29,16 @@ function scallop(pts: Pt[], sweep: 0 | 1, k = 0.62): string {
   return d;
 }
 
-const TONES = { deep: "#B9A882", mid: "#D6C9A9", light: "#EFE6D2", ash: "#57524D" } as const;
+const TONES = { deep: "#1E1410", mid: "#2B1C15", light: "#3B271D", ash: "#0B0706" } as const;
 type Tone = keyof typeof TONES;
 
 function Paper({ d, tone, edge = true }: { d: string; tone: Tone; edge?: boolean }) {
   return (
     <g filter="url(#sum-cast)">
       <path d={d} fill={TONES[tone]} />
-      <path d={d} fill="url(#sum-tex)" opacity={tone === "ash" ? 0.25 : 0.55} style={{ mixBlendMode: "multiply" }} />
+      <path d={d} fill="url(#sum-tex)" opacity={tone === "ash" ? 0.12 : 0.22} style={{ mixBlendMode: "overlay" }} />
       {tone !== "ash" && <path d={d} fill="url(#sum-engrave)" />}
-      {edge && <path d={d} fill="none" stroke="#A88A4E" strokeWidth="1.2" opacity="0.8" />}
+      {edge && <path d={d} fill="none" stroke="#7A1014" strokeWidth="1.4" opacity="0.9" />}
     </g>
   );
 }
@@ -52,34 +52,33 @@ export function SceneryDefs() {
           <image href="/kit/parchment-texture.png" width="600" height="800" />
         </pattern>
         <pattern id="sum-engrave" patternUnits="userSpaceOnUse" width="90" height="90">
-          <image href="/decor/engrave.svg" width="90" height="90" />
+          <image href="/decor/engrave-blood.svg" width="90" height="90" />
         </pattern>
         <filter id="sum-cast" x="-10%" y="-10%" width="120%" height="130%">
-          <feDropShadow dx="0" dy="5" stdDeviation="5" floodColor="#07060a" floodOpacity="0.6" />
+          <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000" floodOpacity="0.8" />
         </filter>
         <linearGradient id="sum-gold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#F0DCA4" />
-          <stop offset="0.5" stopColor="#C9AE72" />
-          <stop offset="1" stopColor="#A88A4E" />
+          <stop offset="0" stopColor="#C9A46A" />
+          <stop offset="0.5" stopColor="#8F6E3E" />
+          <stop offset="1" stopColor="#5E4526" />
         </linearGradient>
-        <radialGradient id="sum-pearl" cx="0.35" cy="0.35" r="0.7">
-          <stop offset="0" stopColor="#FFFDF7" />
-          <stop offset="0.6" stopColor="#EDE3CC" />
-          <stop offset="1" stopColor="#B9A882" />
-        </radialGradient>
+        <linearGradient id="sum-iron" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#8A837C" />
+          <stop offset="1" stopColor="#2E2A28" />
+        </linearGradient>
         <symbol id="sum-rose" viewBox="-20 -20 40 40" overflow="visible">
           {Array.from({ length: 8 }, (_, i) => {
             const a = (i / 8) * Math.PI * 2;
             return (
-              <circle key={i} cx={f(Math.cos(a) * 10)} cy={f(Math.sin(a) * 10)} r="7.5" fill="#F5EFE3" stroke="#8C7444" strokeWidth="0.8" />
+              <circle key={i} cx={f(Math.cos(a) * 10)} cy={f(Math.sin(a) * 10)} r="7.5" fill="#5E1418" stroke="#1A0606" strokeWidth="0.8" />
             );
           })}
-          <circle r="9" fill="#E9DFC9" stroke="#8C7444" strokeWidth="0.8" />
-          <path d="M0 -5 C5 -5 6 2 1 4 C-4 6 -7 -1 -3 -3 C0 -4 2 -1 0 1" fill="none" stroke="#8C7444" strokeWidth="0.9" />
+          <circle r="9" fill="#7A1A17" stroke="#1A0606" strokeWidth="0.8" />
+          <path d="M0 -5 C5 -5 6 2 1 4 C-4 6 -7 -1 -3 -3 C0 -4 2 -1 0 1" fill="none" stroke="#2A0B0C" strokeWidth="1.1" />
         </symbol>
         <symbol id="sum-leaf" viewBox="0 -8 40 16" overflow="visible">
-          <path d="M0 0 Q14 -9 40 0 Q14 9 0 0Z" fill="#D6C9A9" stroke="#8C7444" strokeWidth="0.8" />
-          <path d="M2 0 L36 0 M12 0 L18 -4 M20 0 L26 -4 M12 0 L18 4 M20 0 L26 4" stroke="#8C7444" strokeWidth="0.6" />
+          <path d="M0 0 Q14 -9 40 0 Q14 9 0 0Z" fill="#2B1C15" stroke="#6E1215" strokeWidth="0.8" />
+          <path d="M2 0 L36 0 M12 0 L18 -4 M20 0 L26 -4 M12 0 L18 4 M20 0 L26 4" stroke="#6E1215" strokeWidth="0.6" />
         </symbol>
         <symbol id="sum-star" viewBox="-10 -10 20 20" overflow="visible">
           <path d="M0 -10 L1.5 -1.5 L10 0 L1.5 1.5 L0 10 L-1.5 1.5 L-10 0 L-1.5 -1.5Z" fill="url(#sum-gold)" />
@@ -112,7 +111,7 @@ const STARS = starField(42);
 export function StarField() {
   return (
     <svg className="scn-fill" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-      <g fill="#D9C08A">
+      <g fill="#C4161C">
         {STARS.flecks.map((p, i) => (
           <rect
             key={i}
@@ -121,14 +120,14 @@ export function StarField() {
             width={f(p.s)}
             height={f(p.s * 0.8)}
             rx="1"
-            opacity={0.35 + (i % 5) * 0.12}
+            opacity={i % 4 === 0 ? 0.75 : 0.22 + (i % 5) * 0.07}
             transform={`rotate(${f(p.rot)} ${f(p.x)} ${f(p.y)})`}
             className={i % 6 === 0 ? "twinkle" : undefined}
             style={i % 6 === 0 ? { animationDelay: `${(i % 9) * 0.5}s`, transformOrigin: `${f(p.x)}px ${f(p.y)}px` } : undefined}
           />
         ))}
       </g>
-      {[...STARS.mid, ...STARS.big].map((p, i) => (
+      {[...STARS.mid.slice(0, 24), ...STARS.big.slice(0, 8)].map((p, i) => (
         <use
           key={i}
           href="#sum-star"
@@ -136,6 +135,7 @@ export function StarField() {
           y={f(p.y - p.s)}
           width={f(p.s * 2)}
           height={f(p.s * 2)}
+          opacity="0.55"
           className={i % 3 === 0 ? "twinkle" : undefined}
           style={{ animationDelay: `${(i % 7) * 0.6}s`, transformOrigin: `${f(p.x)}px ${f(p.y)}px` }}
         />
@@ -174,36 +174,57 @@ function edgeY(pts: Pt[], x: number) {
   return pts[pts.length - 1][1];
 }
 
-/** Pearl strands swagged between anchor points along the front valance, with drops at each anchor. */
-const PEARLS = (() => {
+/** Iron chains swagged between anchor points along the front valance, a talisman pinned at each anchor. */
+const CHAINS = (() => {
   const anchors = [150, 440, 720, 1000, 1290].map((x) => [x, edgeY(VAL_FRONT.pts, x) - 6] as Pt);
-  const beads: { x: number; y: number; r: number }[] = [];
-  for (const [sag, r, gap] of [[46, 4.2, 10], [86, 5, 12]] as const) {
+  const links: { x: number; y: number; a: number; flat: boolean }[] = [];
+  for (const sag of [46, 86]) {
     for (let i = 1; i < anchors.length; i++) {
       const [x0, y0] = anchors[i - 1];
       const [x1, y1] = anchors[i];
-      const n = Math.round(Math.hypot(x1 - x0, y1 - y0) / gap);
+      const n = Math.round(Math.hypot(x1 - x0, y1 - y0) / 11);
       for (let k = 1; k < n; k++) {
         const t = k / n;
-        beads.push({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t + sag * 4 * t * (1 - t), r });
+        const dy = (y1 - y0) + sag * 4 * (1 - 2 * t);
+        const a = (Math.atan2(dy, x1 - x0) * 180) / Math.PI;
+        links.push({ x: x0 + (x1 - x0) * t, y: y0 + (y1 - y0) * t + sag * 4 * t * (1 - t), a, flat: k % 2 === 0 });
       }
     }
   }
-  const drops = anchors.flatMap(([x, y]) => Array.from({ length: 6 }, (_, k) => ({ x, y: y + 4 + k * 9, r: k === 5 ? 6.5 : 3.6 })));
-  return { beads: [...beads, ...drops], anchors };
+  return { links, anchors };
 })();
 
-const GAUZE =
-  "M-40 -20 L300 -20 C270 30 200 64 160 130 C130 180 110 250 92 330 C80 316 70 322 60 340 C52 326 40 330 28 352 C16 336 0 344 -40 360 Z";
+const TALISMANS = ["yellow", "white", "red"] as const;
 
-function Pearls() {
+const GAUZE =
+  "M-40 -20 L300 -20 C270 30 200 64 160 130 C130 180 110 250 92 330 L84 300 L74 344 L62 312 L50 350 L40 322 L28 358 L14 330 L0 362 L-40 360 Z";
+
+function Chains() {
   return (
     <g filter="url(#sum-cast)">
-      {PEARLS.beads.map((b, i) => (
-        <circle key={i} cx={f(b.x)} cy={f(b.y)} r={b.r} fill="url(#sum-pearl)" stroke="#A88A4E" strokeWidth="0.5" />
+      {CHAINS.links.map((l, i) => (
+        <ellipse
+          key={i}
+          cx={f(l.x)}
+          cy={f(l.y)}
+          rx="7.5"
+          ry={l.flat ? 1.8 : 4}
+          transform={`rotate(${f(l.a)} ${f(l.x)} ${f(l.y)})`}
+          fill="none"
+          stroke="url(#sum-iron)"
+          strokeWidth="2.6"
+        />
       ))}
-      {PEARLS.anchors.map(([x, y], i) => (
-        <use key={i} href="#sum-rose" x={f(x - 13)} y={f(y - 15)} width="26" height="26" />
+      {CHAINS.anchors.map(([x, y], i) => (
+        <image
+          key={i}
+          href={`/decor/talisman-${TALISMANS[i % 3]}.svg`}
+          x={f(x - 15)}
+          y={f(y - 4)}
+          width="30"
+          height="80"
+          transform={`rotate(${(i % 2 ? 1 : -1) * (4 + i * 2)} ${f(x)} ${f(y)})`}
+        />
       ))}
     </g>
   );
@@ -212,8 +233,8 @@ function Pearls() {
 function Gauze({ flip }: { flip?: boolean }) {
   return (
     <g transform={flip ? "translate(1440 0) scale(-1 1)" : undefined} opacity="0.85">
-      <path d={GAUZE} fill="#F5EFE3" opacity="0.38" />
-      <g stroke="#F5EFE3" strokeWidth="0.7" opacity="0.6" fill="none">
+      <path d={GAUZE} fill="#5E0D0F" opacity="0.6" />
+      <g stroke="#8E1B1B" strokeWidth="0.8" opacity="0.7" fill="none">
         {Array.from({ length: 9 }, (_, i) => (
           <path key={i} d={`M${20 + i * 30} -10 C${10 + i * 22} 80 ${i * 14} 200 ${-10 + i * 10} ${330 - i * 6}`} />
         ))}
@@ -245,7 +266,7 @@ function Valance() {
           <Paper d={VAL_FRONT.d} tone="light" />
           <Gauze />
           <Gauze flip />
-          <Pearls />
+          <Chains />
           {roses.map(([x, y], i) => (
             <g key={i}>
               <use href="#sum-leaf" x={f(x - 36)} y={f(y - 12)} width="34" height="14" transform={`rotate(150 ${f(x - 18)} ${f(y - 4)})`} />
@@ -306,7 +327,7 @@ function Column({ side }: { side: "left" | "right" }) {
       <Layer depth={11} className={`scn-col ${side}`}>
         <svg viewBox="0 0 150 900" preserveAspectRatio="xMinYMid slice">
           <Paper d={COL_MID} tone="mid" />
-          <path d={VINE.d} fill="none" stroke="#8C7444" strokeWidth="1.4" />
+          <path d={VINE.d} fill="none" stroke="#5E1418" strokeWidth="1.4" />
           {VINE.leaves.map((l, i) => (
             <use key={i} href="#sum-leaf" x={f(l.x)} y={f(l.y - 7)} width="30" height="12" transform={`rotate(${l.a} ${f(l.x)} ${f(l.y)})`} />
           ))}
@@ -318,14 +339,14 @@ function Column({ side }: { side: "left" | "right" }) {
       <Layer depth={16} className={`scn-col lace ${side}`}>
         <svg viewBox="0 0 150 900" preserveAspectRatio="xMinYMid slice">
           <g filter="url(#sum-cast)">
-            <path d={LACE.d} fill="#F5EFE3" />
+            <path d={LACE.d} fill="#2B1C15" />
             {LACE.holes.map(([x, y], i) => (
               <g key={i}>
-                <circle cx={x} cy={y} r="3.2" fill="#1B1A1F" opacity="0.75" />
-                <circle cx={8} cy={y} r="1.6" fill="#1B1A1F" opacity="0.45" />
+                <circle cx={x} cy={y} r="3.2" fill="#000" opacity="0.85" />
+                <circle cx={8} cy={y} r="1.6" fill="#7A1014" opacity="0.8" />
               </g>
             ))}
-            <path d="M14 -10 L14 920" stroke="#A88A4E" strokeWidth="0.8" strokeDasharray="3 3" />
+            <path d="M14 -10 L14 920" stroke="#7A1014" strokeWidth="0.8" strokeDasharray="3 3" />
           </g>
         </svg>
       </Layer>
@@ -375,18 +396,18 @@ function Town({ pumpkins = true }: { pumpkins?: boolean }) {
         <svg viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice">
           <Paper d={TOWN.houses} tone="ash" edge={false} />
           {TOWN.windows.map((w, i) => (
-            <rect key={i} x={f(w.x)} y={f(w.y)} width="6" height="9" fill={w.lit ? "#E6A35A" : "#2C2930"} opacity={w.lit ? 0.9 : 0.6} />
+            <rect key={i} x={f(w.x)} y={f(w.y)} width="6" height="9" fill={w.lit ? "#D21F26" : "#1E1410"} opacity={w.lit ? 0.85 : 0.7} />
           ))}
         </svg>
       </Layer>
       <Layer depth={8} className="scn-bottom">
         <svg viewBox="0 0 1440 260" preserveAspectRatio="xMidYMax slice">
           <Paper d={TOWN.hill} tone="deep" />
-          <g fill="#4A4744" filter="url(#sum-cast)">
+          <g fill="#0B0706" filter="url(#sum-cast)">
             {TOWN.stones.map((s, i) => {
               const y = 196 + 18 * Math.sin(s.x / 160);
               return i % 3 === 2 ? (
-                <path key={i} d={`M${f(s.x)} ${f(y)}l0 ${f(-s.h - 10)}m-7 9l14 0`} stroke="#4A4744" strokeWidth="4" />
+                <path key={i} d={`M${f(s.x)} ${f(y)}l0 ${f(-s.h - 10)}m-7 9l14 0`} stroke="#0B0706" strokeWidth="4" />
               ) : (
                 <path key={i} d={`M${f(s.x - 8)} ${f(y)}l0 ${f(-s.h)}a8 8 0 0 1 16 0l0 ${f(s.h)}z`} />
               );
@@ -418,45 +439,41 @@ function Town({ pumpkins = true }: { pumpkins?: boolean }) {
 type Hang = {
   left: number;
   len: number;
-  kind: "moon" | "star" | "lantern" | "moth" | "skull";
+  kind: "moon" | "talisman" | "lantern" | "moth" | "skull";
   size: number;
   dur: number;
   page?: boolean;
 };
 
 const HANGS: Hang[] = [
-  { left: 9, len: 26, kind: "star", size: 34, dur: 5.1, page: true },
+  { left: 9, len: 26, kind: "talisman", size: 34, dur: 5.1, page: true },
   { left: 12.5, len: 44, kind: "skull", size: 40, dur: 6.6, page: true },
   { left: 15, len: 38, kind: "lantern", size: 46, dur: 6.3 },
-  { left: 22, len: 24, kind: "star", size: 24, dur: 4.4, page: true },
+  { left: 22, len: 24, kind: "talisman", size: 24, dur: 4.4, page: true },
   { left: 26, len: 46, kind: "skull", size: 34, dur: 5.4 },
   { left: 29, len: 32, kind: "moth", size: 64, dur: 7.2 },
-  { left: 71, len: 24, kind: "star", size: 28, dur: 4.8 },
+  { left: 71, len: 24, kind: "talisman", size: 28, dur: 4.8 },
   { left: 74, len: 46, kind: "skull", size: 34, dur: 6.1 },
   { left: 78, len: 40, kind: "moon", size: 84, dur: 6.8 },
-  { left: 86, len: 24, kind: "star", size: 30, dur: 5.6, page: true },
+  { left: 86, len: 24, kind: "talisman", size: 30, dur: 5.6, page: true },
   { left: 89, len: 46, kind: "skull", size: 38, dur: 5.2, page: true },
   { left: 92, len: 35, kind: "lantern", size: 40, dur: 5.9, page: true },
 ];
 
 function Ornament({ kind, size }: { kind: Hang["kind"]; size: number }) {
-  if (kind === "moon") return <img src="/kit/crescent-moon.svg" alt="" style={{ width: size }} />;
+  if (kind === "moon") return <img src="/kit/crescent-moon.svg" alt="" style={{ width: size }} className="blood-moon" />;
   if (kind === "moth") return <img src="/kit/moth.svg" alt="" style={{ width: size }} />;
   if (kind === "skull") return <img src="/decor/skull.svg" alt="" style={{ width: size }} className="sticker" />;
-  if (kind === "star")
-    return (
-      <svg width={size} height={size} viewBox="-10 -10 20 20">
-        <use href="#sum-star" x="-10" y="-10" width="20" height="20" />
-      </svg>
-    );
+  if (kind === "talisman")
+    return <img src={`/decor/talisman-${TALISMANS[size % 3]}.svg`} alt="" style={{ width: size * 0.9 }} />;
   return (
     <svg width={size} height={size * 1.6} viewBox="0 0 40 64" className="lantern">
       <path d="M12 6 L28 6 L32 14 L8 14 Z" fill="#1B1A1F" />
-      <rect x="10" y="14" width="20" height="34" rx="3" fill="#E6A35A" opacity="0.9" />
+      <rect x="10" y="14" width="20" height="34" rx="3" fill="#D21F26" opacity="0.9" />
       <rect x="10" y="14" width="20" height="34" rx="3" fill="none" stroke="#1B1A1F" strokeWidth="2.4" />
       <path d="M16.7 14 V48 M23.3 14 V48" stroke="#1B1A1F" strokeWidth="1.6" />
       <path d="M8 48 L32 48 L28 56 L12 56 Z" fill="#1B1A1F" />
-      <circle cx="20" cy="2" r="2.4" fill="none" stroke="#A88A4E" strokeWidth="1.4" />
+      <circle cx="20" cy="2" r="2.4" fill="none" stroke="#5E4526" strokeWidth="1.4" />
     </svg>
   );
 }
@@ -499,25 +516,6 @@ function Night({ page }: { page: boolean }) {
         </div>
       ))}
     </Layer>
-  );
-}
-
-/** Pumpkin hot-air balloon with a candle riding in the basket. */
-export function Balloon({ className, style }: { className?: string; style?: CSSProperties }) {
-  return (
-    <div className={`balloon ${className ?? ""}`} style={style} aria-hidden="true">
-      <svg viewBox="0 0 160 250">
-        <image href="/kit/pumpkin.svg" x="0" y="0" width="160" height="140" />
-        <path d="M44 128 L62 196 M116 128 L98 196 M80 136 L80 196" stroke="#A88A4E" strokeWidth="1.6" />
-        <image href="/kit/candle.svg" x="66" y="150" width="28" height="52" />
-        <g filter="url(#sum-cast)">
-          <path d="M56 196 L104 196 L98 236 L62 236 Z" fill="#D6C9A9" />
-          <path d="M56 196 L104 196 L98 236 L62 236 Z" fill="url(#sum-engrave)" />
-          <path d="M54 194 L106 194 L106 201 L54 201 Z" fill="#A88A4E" />
-          <path d="M56 196 L104 196 L98 236 L62 236 Z" fill="none" stroke="#4A4744" strokeWidth="1.4" />
-        </g>
-      </svg>
-    </div>
   );
 }
 

@@ -21,15 +21,28 @@ export const CHAPTERS: {
 
 export interface HostSettings {
   eventName: string;
-  eventDate: string;
+  presenter: string;
   subtitle: string;
+  eventDate: string;
+  eventDay: string;
+  eventTime: string;
+  doors: string;
+  venue: string;
+  city: string;
   soundOn: boolean;
 }
 
+/** Defaults match the party poster; all of it is editable in host settings (Shift+H). */
 export const DEFAULT_HOST: HostSettings = {
   eventName: "Sebelum Uber Menjemput",
+  presenter: "Permias NYC",
+  subtitle: "Halloween",
   eventDate: "November 1, 2026",
-  subtitle: "A Haunted Tale",
+  eventDay: "Sunday",
+  eventTime: "9 PM — 12 AM",
+  doors: "Doors open 9 PM",
+  venue: "@ SoHo",
+  city: "New York, NY",
   soundOn: false,
 };
 
