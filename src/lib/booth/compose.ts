@@ -390,6 +390,9 @@ export async function composeStory(strip: HTMLCanvasElement, host: HostSettings)
 const toBlob = (c: HTMLCanvasElement, type: string, q?: number) =>
   new Promise<Blob>((res, rej) => c.toBlob((b) => (b ? res(b) : rej(new Error("encode failed"))), type, q));
 
+/** JPEG at 0.88: the story image is all photo and texture, where PNG only adds weight. */
+export const encodeJpeg = (c: HTMLCanvasElement) => toBlob(c, "image/jpeg", 0.88);
+
 /** PNG if it stays under 2.5 MB, JPEG at 0.9 otherwise. */
 export async function encode(c: HTMLCanvasElement): Promise<Blob> {
   const png = await toBlob(c, "image/png");

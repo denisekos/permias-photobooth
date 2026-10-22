@@ -38,12 +38,12 @@ async function getBytes(Key: string): Promise<Buffer | null> {
  */
 export const s3Store: Store = {
   async create(record: StripRecord, files: StoredFile[]) {
-    for (const f of files) {
-      await s3().send(
-        new PutObjectCommand({ Bucket: Bucket(), Key: f.key, Body: f.body, ContentType: f.type }),
-      );
-    }
-    await this.update(record);
+    await Promise.all([
+      ...files.map((f) =>
+        s3().send(new PutObjectCommand({ Bucket: Bucket(), Key: f.key, Body: f.body, ContentType: f.type })),
+      ),
+      this.update(record),
+    ]);
   },
 
   async get(id) {

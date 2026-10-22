@@ -1980,3 +1980,22 @@ img {
   from { transform: scaleY(1); }
   to { transform: scaleY(0.6); }
 }
+
+.reload-qr {
+  margin-top: 2px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--blood-dk);
+  background: var(--blood-dk);
+  color: var(--ivory);
+  font-family: var(--label);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.reload-qr:active {
+  transform: translateY(1px);
+}

@@ -2,7 +2,7 @@
 
 import QRCode from "qrcode";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PHOTO_RECTS, composeStory, composeStrip, encode, preloadAssets } from "@/lib/booth/compose";
+import { PHOTO_RECTS, composeStory, composeStrip, encode, encodeJpeg, preloadAssets } from "@/lib/booth/compose";
 import { gainFor, ghostOf, grabPhoto, sampleLuminance } from "@/lib/booth/photo";
 import {
   CHAPTERS,
@@ -30,6 +30,7 @@ type Upload =
 const REVIEW_AUTOPRINT_MS = 30_000;
 const FINAL_IDLE_MS = 60_000;
 const UPLOAD_RETRY_MS = 5_000;
+const UPLOAD_TIMEOUT_MS = 20_000;
 const PRINT_MS = 6_400;
 const PRINT_MS_REDUCED = 1_600;
 
@@ -142,6 +143,10 @@ export default function Booth() {
   const filterRef = useRef<FilterId>("candle");
   const capturingRef = useRef(false);
   const printingRef = useRef(false);
+  const uploadRunning = useRef(false);
+  const uploadInflight = useRef<AbortController | null>(null);
+  const uploadWake = useRef<(() => void) | null>(null);
+  const uploadManual = useRef(false);
   filterRef.current = filter;
   gainRef.current = gain;
 
@@ -274,7 +279,7 @@ export default function Booth() {
       setStrip({ url: URL.createObjectURL(blob), ghosts: photos.current.map(ghostOf) });
       storyBlob.current = composeStory(canvas, host)
         .then(async (story) => {
-          const b = await encode(story);
+          const b = await encodeJpeg(story);
           story.width = 0;
           return b;
         })
@@ -332,49 +337,108 @@ export default function Booth() {
     goTo("frame");
   }, [retakesLeft, screen, goTo]);
 
+  /** Waits for the retry delay, or less if the host presses Reload QR. */
+  const waitForRetry = useCallback((ms: number, token: number) => {
+    return new Promise<void>((resolve, reject) => {
+      const done = () => {
+        clearTimeout(timer);
+        uploadWake.current = null;
+        if (token === session.current) resolve();
+        else reject(new Cancelled());
+      };
+      const timer = setTimeout(done, ms);
+      uploadWake.current = done;
+    });
+  }, []);
+
   const runUpload = useCallback(
     async (token: number) => {
+      if (uploadRunning.current) return;
+      uploadRunning.current = true;
       setUpload({ status: "uploading" });
-      const story = await storyBlob.current;
-      while (token === session.current) {
-        const blob = stripBlob.current;
-        if (!blob) return;
-        let reason = navigator.onLine ? "the press is jammed" : "offline";
-        try {
-          const fd = new FormData();
-          fd.append("strip", blob, blob.type === "image/jpeg" ? "strip.jpg" : "strip.png");
-          if (story) fd.append("story", story, story.type === "image/jpeg" ? "story.jpg" : "story.png");
-          const res = await fetch("/api/strips", { method: "POST", body: fd, headers: { "x-booth-device": deviceId() } });
-          if (res.ok) {
-            const { url } = (await res.json()) as { url: string };
-            const qrSvg = await QRCode.toString(url, {
-              type: "svg",
-              errorCorrectionLevel: "M",
-              margin: 1,
-              color: { dark: "#1B1A1F", light: "#F5EFE3" },
+      try {
+        const story = await storyBlob.current;
+        while (token === session.current) {
+          const blob = stripBlob.current;
+          if (!blob) return;
+          let reason = navigator.onLine ? "the press is jammed" : "offline";
+          const ctrl = new AbortController();
+          uploadInflight.current = ctrl;
+          const timer = setTimeout(() => ctrl.abort(), UPLOAD_TIMEOUT_MS);
+          try {
+            const fd = new FormData();
+            fd.append("strip", blob, blob.type === "image/jpeg" ? "strip.jpg" : "strip.png");
+            if (story) fd.append("story", story, story.type === "image/jpeg" ? "story.jpg" : "story.png");
+            const res = await fetch("/api/strips", {
+              method: "POST",
+              body: fd,
+              headers: { "x-booth-device": deviceId() },
+              signal: ctrl.signal,
             });
-            if (token === session.current) setUpload({ status: "done", url, qrSvg });
+            if (res.ok) {
+              const { url } = (await res.json()) as { url: string };
+              const qrSvg = await QRCode.toString(url, {
+                type: "svg",
+                errorCorrectionLevel: "M",
+                margin: 1,
+                color: { dark: "#1B1A1F", light: "#F5EFE3" },
+              });
+              if (token === session.current) setUpload({ status: "done", url, qrSvg });
+              return;
+            }
+            if (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 408) {
+              if (token === session.current) setUpload({ status: "error", message: await res.text() });
+              return;
+            }
+            if (res.status === 429) reason = "too many tales at once";
+          } catch {
+            if (uploadManual.current) reason = "retrying";
+            else if (ctrl.signal.aborted) reason = "the press is slow";
+            else reason = navigator.onLine ? "the connection dropped" : "offline";
+          } finally {
+            clearTimeout(timer);
+            uploadInflight.current = null;
+          }
+          if (token !== session.current) return;
+          if (uploadManual.current) {
+            // Reload QR pressed mid-attempt: go again straight away.
+            uploadManual.current = false;
+            setUpload({ status: "uploading" });
+            continue;
+          }
+          setUpload({ status: "offline", reason });
+          try {
+            await waitForRetry(UPLOAD_RETRY_MS, token);
+          } catch {
             return;
           }
-          if (res.status >= 400 && res.status < 500 && res.status !== 429 && res.status !== 408) {
-            if (token === session.current) setUpload({ status: "error", message: await res.text() });
-            return;
-          }
-          if (res.status === 429) reason = "too many tales at once";
-        } catch {
-          reason = navigator.onLine ? "the connection dropped" : "offline";
+          setUpload({ status: "uploading" });
         }
-        if (token !== session.current) return;
-        setUpload({ status: "offline", reason });
-        try {
-          await sleep(UPLOAD_RETRY_MS, token);
-        } catch {
-          return;
-        }
+      } finally {
+        uploadRunning.current = false;
+        uploadInflight.current = null;
+        uploadWake.current = null;
+        uploadManual.current = false;
       }
     },
-    [sleep],
+    [waitForRetry],
   );
+
+  /** Reload QR: cut short a slow attempt or the retry wait, or start over after a refusal. */
+  const reloadQr = useCallback(() => {
+    if (!stripBlob.current) return;
+    if (!uploadRunning.current) {
+      runUpload(session.current);
+      return;
+    }
+    setUpload({ status: "uploading" });
+    if (uploadInflight.current) {
+      uploadManual.current = true;
+      uploadInflight.current.abort();
+    } else {
+      uploadWake.current?.();
+    }
+  }, [runUpload]);
 
   const print = useCallback(async () => {
     if (screen !== "review" || !strip || printingRef.current) return;
@@ -758,6 +822,7 @@ export default function Booth() {
                 ) : upload.status === "error" ? (
                   <div className="qr waiting">
                     <p className="tag-wait">The press refused this one.</p>
+                    <button type="button" className="reload-qr" onClick={reloadQr}>↻ Reload QR</button>
                     <button type="button" className="text-btn" onClick={saveLocally}>Save on this laptop</button>
                   </div>
                 ) : (
@@ -766,6 +831,7 @@ export default function Booth() {
                     <p className="tag-wait">
                       {upload.status === "offline" ? `Waiting for the spirits (${upload.reason})` : "Writing your link…"}
                     </p>
+                    <button type="button" className="reload-qr" onClick={reloadQr}>↻ Reload QR</button>
                     {upload.status === "offline" && (
                       <button type="button" className="text-btn" onClick={saveLocally}>Save on this laptop</button>
                     )}
