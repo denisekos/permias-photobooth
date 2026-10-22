@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { useParallax } from "./useParallax";
 
 function rng(seed: number) {
   return () => {
@@ -58,35 +59,7 @@ const midTreeB = bareTree(392, 300, 190, 29);
 export default function NightScene({ still }: { still: boolean }) {
   const root = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const el = root.current;
-    if (!el || still) return;
-    let tx = 0, ty = 0, x = 0, y = 0;
-    let lastMove = 0;
-    let raf = 0;
-    const onMove = (e: PointerEvent) => {
-      tx = (e.clientX / window.innerWidth) * 2 - 1;
-      ty = (e.clientY / window.innerHeight) * 2 - 1;
-      lastMove = performance.now();
-    };
-    const loop = (t: number) => {
-      if (t - lastMove > 4000) {
-        tx = Math.sin(t / 5200) * 0.6;
-        ty = Math.cos(t / 7100) * 0.35;
-      }
-      x += (tx - x) * 0.05;
-      y += (ty - y) * 0.05;
-      el.style.setProperty("--px", x.toFixed(4));
-      el.style.setProperty("--py", y.toFixed(4));
-      raf = requestAnimationFrame(loop);
-    };
-    window.addEventListener("pointermove", onMove);
-    raf = requestAnimationFrame(loop);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      cancelAnimationFrame(raf);
-    };
-  }, [still]);
+  useParallax(root, still);
 
   return (
     <div className="scene" ref={root} aria-hidden="true">

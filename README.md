@@ -2,6 +2,10 @@
 
 A laptop photobooth that takes 3 photos, prints them as a storybook strip with a slot-and-drop animation, and hands guests a QR code to download the strip for 48 hours. Built from `PRD_Haunted_Storybook_Photobooth.md` with the original illustration kit in `public/kit/`.
 
+## Look
+
+Every screen sits inside a layered paper-cut theatre (`src/components/Scenery.tsx`): a starry, velvet-textured night sky, scalloped valances and side columns cut from engraved parchment, lace strips, a paper town along the bottom, hanging stars, lanterns, moths and a moon, and pumpkin hot-air balloons. Layers drift with the cursor (parallax). Anything guests need to read sits on a scalloped parchment panel or a dark placard. The phone pages use the same scenery: `npm run gen:scenery` renders it to `src/lib/server/scenery-html.ts`, and runs automatically before `dev` and `build`.
+
 ## Run it
 
 ```bash
@@ -43,6 +47,7 @@ No database is needed: each strip's record is a small JSON object stored next to
 | `GET /api/strips/:id/image` → 10-minute signed URL, counts downloads | `src/app/api/strips/[id]/image/route.ts` |
 | Hourly cleanup | `src/app/api/cron/cleanup/route.ts` |
 | Synthesized sounds (muted by default) | `src/lib/booth/sound.ts` |
+| Paper-cut scenery, balloons, hanging ornaments | `src/components/Scenery.tsx`, `public/decor/` |
 
 P1 items included: filters, three chapters (The Raven, The Masquerade, The Midnight Garden), host event name and date, story-format image, Web Share, sound.
 

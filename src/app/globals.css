@@ -12,6 +12,7 @@
   --script: "Pinyon Script", cursive;
 
   --strip-h: min(68vh, 640px);
+  --col-w: min(17vh, 13vw);
   --strip-w: calc(var(--strip-h) / 3);
 }
 
@@ -51,17 +52,130 @@ img {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background: var(--parchment) url(/kit/parchment-texture.png) center / cover no-repeat;
+  color: var(--ivory);
+  background: radial-gradient(ellipse 80% 70% at 50% 42%, #2c2935 0%, #211f28 50%, #141317 100%);
 }
 
-.booth::after {
-  /* candlelit edges */
+.booth::before {
+  /* velvet paper grain on the night sky */
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse 75% 70% at 50% 48%, transparent 55%, rgba(74, 52, 28, 0.28) 100%);
+  background: url(/kit/parchment-texture.png) center / cover;
+  mix-blend-mode: overlay;
+  opacity: 0.22;
+}
+
+.booth::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 80% 75% at 50% 48%, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
   z-index: 1;
+}
+
+/* ---------- scenery (paper-cut theatre) ---------- */
+
+.scenery {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.scn-layer {
+  position: absolute;
+  transform: translate3d(calc(var(--px, 0) * var(--d) * -1px), calc(var(--py, 0) * var(--d) * -0.6px), 0);
+  will-change: transform;
+}
+
+.scn-layer > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scn-stars { inset: -24px; }
+.scn-top { top: -14px; left: -30px; right: -30px; height: 25vh; }
+.scn-bottom { bottom: -14px; left: -30px; right: -30px; height: 28vh; }
+.scn-col { top: -20px; bottom: -20px; width: var(--col-w); }
+.scn-col.left { left: -22px; }
+.scn-col.right { right: -22px; }
+.scn-col.right > svg { transform: scaleX(-1); }
+.scn-hangers { inset: 0; }
+
+.hang {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  transform-origin: 50% 0;
+  animation: sway 5s ease-in-out infinite alternate;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.5));
+}
+
+.hang .thread {
+  width: 1.2px;
+  background: linear-gradient(#8c7444, #c9ae72);
+}
+
+.hang img,
+.hang svg {
+  display: block;
+  margin-top: -2px;
+}
+
+.lantern rect:first-of-type {
+  animation: lantern 2.6s ease-in-out infinite;
+}
+
+@keyframes sway {
+  from { transform: translateX(-50%) rotate(-3.5deg); }
+  to { transform: translateX(-50%) rotate(3.5deg); }
+}
+
+@keyframes lantern {
+  0%, 100% { opacity: 0.95; }
+  40% { opacity: 0.7; }
+  60% { opacity: 0.9; }
+}
+
+.balloon {
+  position: absolute;
+  width: 150px;
+  z-index: 2;
+  pointer-events: none;
+  animation: bob 7s ease-in-out infinite;
+  filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.45));
+}
+
+.balloon svg {
+  display: block;
+  width: 100%;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+  50% { transform: translate(10px, -16px) rotate(2deg); }
+}
+
+/* scalloped parchment card: everything readable sits on one of these */
+.panel {
+  position: relative;
+  color: var(--ink);
+  border: 14px solid transparent;
+  border-image: url(/decor/scallop.svg) 14 round;
+  background:
+    url(/decor/engrave-faint.svg) 0 0 / 90px 90px,
+    url(/kit/parchment-texture.png) center / cover,
+    #e6dcc5;
+  background-clip: padding-box;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.55));
 }
 
 .screen {
@@ -204,9 +318,16 @@ img {
   place-items: center;
 }
 
+.cover-mat {
+  padding: 8px;
+  z-index: 3;
+  filter: none;
+  box-shadow: 0 30px 60px -10px rgba(0, 0, 0, 0.7);
+}
+
 .cover {
   position: relative;
-  height: min(86vh, 790px);
+  height: min(78vh, 720px);
   aspect-ratio: 0.68;
   padding: 5.5% 7% 6%;
   display: flex;
@@ -333,41 +454,45 @@ img {
 
 .privacy {
   position: absolute;
-  bottom: 2.4vh;
-  left: 0;
-  right: 0;
+  bottom: 2vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 90vw;
   text-align: center;
   font-family: var(--type);
   font-size: 14px;
-  color: var(--ash);
+  color: var(--ivory);
+  background: rgba(27, 26, 31, 0.82);
+  border: 1px solid rgba(168, 138, 78, 0.6);
+  padding: 7px 16px;
+  border-radius: 999px;
   margin: 0;
   z-index: 3;
 }
 
+.attract-balloon {
+  left: calc(50% - min(78vh, 720px) * 0.34 - 300px);
+  top: 24vh;
+}
+
+.attract-balloon.small {
+  left: auto;
+  right: calc(50% - min(78vh, 720px) * 0.34 - 250px);
+  top: 36vh;
+  width: 100px;
+  animation-duration: 9s;
+  animation-delay: -3s;
+}
+
 .candle-stand {
   position: absolute;
-  bottom: 9vh;
+  bottom: 6vh;
   z-index: 2;
 }
 
-.candle-stand.left { left: calc(50% - min(86vh, 790px) * 0.34 - 200px); }
-.candle-stand.right { right: calc(50% - min(86vh, 790px) * 0.34 - 170px); }
-
-.attract-moth {
-  position: absolute;
-  width: 120px;
-  top: 8vh;
-  right: calc(50% - min(86vh, 790px) * 0.34 - 190px);
-  transform: rotate(14deg);
-  opacity: 0.9;
-  z-index: 2;
-  animation: moth 9s ease-in-out infinite;
-}
-
-@keyframes moth {
-  0%, 100% { transform: rotate(14deg) translate(0, 0); }
-  50% { transform: rotate(8deg) translate(-8px, 6px); }
-}
+.candle-stand.left { left: calc(50% - min(78vh, 720px) * 0.34 - 170px); }
+.candle-stand.right { right: calc(50% - min(78vh, 720px) * 0.34 - 140px); }
 
 /* ---------- candle flicker ---------- */
 
@@ -469,6 +594,15 @@ img {
   padding: 3.6vh 4vw;
 }
 
+.denied-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 28px 44px 34px;
+  max-width: 760px;
+}
+
 .denied {
   display: flex;
   flex-direction: column;
@@ -508,7 +642,7 @@ img {
 .camera {
   --preview-h: min(calc(100vh - 7.2vh - 140px), calc((92vw - 340px - 3.5vw - 60px) * 0.75));
   display: grid;
-  grid-template-columns: auto 320px;
+  grid-template-columns: auto 350px;
   grid-template-rows: auto auto;
   column-gap: 3.5vw;
   row-gap: 2.6vh;
@@ -518,6 +652,22 @@ img {
 
 .page-head {
   grid-column: 1 / -1;
+  justify-self: start;
+  position: relative;
+  z-index: 2;
+  padding: 12px 28px 16px;
+  background: rgba(27, 26, 31, 0.9);
+  border: 1px solid rgba(168, 138, 78, 0.8);
+  box-shadow: inset 0 0 0 4px rgba(27, 26, 31, 0.9), inset 0 0 0 5px rgba(168, 138, 78, 0.45), 0 10px 24px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+}
+
+.page-head .kicker {
+  color: #c9ae72;
+}
+
+.page-head .page-title {
+  color: var(--ivory);
 }
 
 .gilt {
@@ -607,7 +757,8 @@ img {
   align-self: center;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 20px;
+  padding: 16px 14px 18px;
 }
 
 .choices {
@@ -807,6 +958,16 @@ img {
   color: var(--ash);
 }
 
+.review-copy {
+  padding: 34px 40px 30px;
+}
+
+.review-balloon {
+  top: 16vh;
+  right: 9vw;
+  width: 120px;
+}
+
 .review-copy .page-title {
   font-size: clamp(44px, 4.4vw, 64px);
 }
@@ -884,6 +1045,13 @@ img {
   margin-right: 30px;
 }
 
+.caption-panel {
+  padding: 22px 26px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .caption {
   min-height: 230px;
   display: flex;
@@ -924,6 +1092,7 @@ img {
 }
 
 .sign {
+  color: var(--ink);
   font-family: var(--type);
   font-size: 18px;
   letter-spacing: 0.06em;
@@ -1077,6 +1246,7 @@ img {
 }
 
 .tag {
+  color: var(--ink);
   position: absolute;
   top: 10.5vh;
   left: 1vw;
@@ -1282,9 +1452,13 @@ img {
   font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ash);
+  color: var(--ivory);
   cursor: pointer;
-  opacity: 0.75;
+  opacity: 0.8;
+  z-index: 25;
+  background: rgba(27, 26, 31, 0.7);
+  padding: 5px 10px;
+  border-radius: 999px;
 }
 
 .host-gear {
@@ -1294,9 +1468,10 @@ img {
   z-index: 20;
   background: none;
   border: 0;
-  color: var(--ash);
-  opacity: 0.35;
+  color: var(--gold);
+  opacity: 0.6;
   font-size: 16px;
+  z-index: 25;
   cursor: pointer;
 }
 
@@ -1383,6 +1558,12 @@ img {
 
 /* ---------- reduced motion ---------- */
 
+.reduced .hang,
+.reduced .balloon,
+.reduced .lantern rect {
+  animation: none;
+}
+
 .reduced .dust,
 .reduced .leaf {
   display: none;
@@ -1429,3 +1610,8 @@ img {
   transform: rotate(-2deg);
   animation: fade-in 0.4s 0.8s both;
 }
+
+/* working screens keep the theatre a little shallower so the camera and strip have room */
+.scenery.page .scn-top { height: 19vh; }
+.scenery.page .scn-bottom { height: 22vh; }
+.scenery.page .scn-col { width: calc(var(--col-w) * 0.8); }

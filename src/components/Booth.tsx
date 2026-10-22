@@ -17,6 +17,8 @@ import {
 } from "@/lib/booth/settings";
 import * as sound from "@/lib/booth/sound";
 import NightScene from "./NightScene";
+import Scenery, { Balloon, SceneryDefs } from "./Scenery";
+import { useParallax } from "./useParallax";
 
 type Screen = "attract" | "waking" | "denied" | "frame" | "capture" | "review" | "print";
 
@@ -120,6 +122,8 @@ export default function Booth() {
   const [ready, setReady] = useState(false);
   const [lightbox, setLightbox] = useState(false);
 
+  const rootRef = useRef<HTMLDivElement>(null);
+  useParallax(rootRef, reduced);
   const session = useRef(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const photos = useRef<HTMLCanvasElement[]>([]);
@@ -472,7 +476,9 @@ export default function Booth() {
   const showCamera = screen === "frame" || screen === "capture";
 
   return (
-    <div className={`booth${reduced ? " reduced" : ""}`}>
+    <div ref={rootRef} className={`booth${reduced ? " reduced" : ""}`}>
+      <SceneryDefs />
+      <Scenery variant={screen === "attract" || screen === "waking" ? "full" : "page"} />
       {(screen === "attract" || screen === "waking") && (
         <section className="screen attract" aria-label="Cover">
           <Dust />
@@ -482,19 +488,22 @@ export default function Booth() {
           <div className="candle-stand right" aria-hidden="true">
             <Candle small />
           </div>
-          <img className="attract-moth" src="/kit/moth.svg" alt="" aria-hidden="true" />
-          <div className="cover">
-            <FrameCorners />
-            <p className="cover-kicker">A storybook photobooth</p>
-            <div className="window">
-              <NightScene still={reduced} />
+          <Balloon className="attract-balloon" />
+          <Balloon className="attract-balloon small" />
+          <div className="panel cover-mat">
+            <div className="cover">
+              <FrameCorners />
+              <p className="cover-kicker">A storybook photobooth</p>
+              <div className="window">
+                <NightScene still={reduced} />
+              </div>
+              <h1 className="cover-title">Sebelum Uber Menjemput</h1>
+              <p className="cover-script">{host.subtitle}</p>
+              <div className="cover-rule" aria-hidden="true"><i /></div>
+              <SealButton onClick={openBook} disabled={screen === "waking"}>
+                {screen === "waking" ? "Waking the camera…" : "Open the book"}
+              </SealButton>
             </div>
-            <h1 className="cover-title">Sebelum Uber Menjemput</h1>
-            <p className="cover-script">{host.subtitle}</p>
-            <div className="cover-rule" aria-hidden="true"><i /></div>
-            <SealButton onClick={openBook} disabled={screen === "waking"}>
-              {screen === "waking" ? "Waking the camera…" : "Open the book"}
-            </SealButton>
           </div>
           <p className="privacy">Photos are kept for 48 hours so you can download them, then deleted.</p>
         </section>
@@ -502,16 +511,18 @@ export default function Booth() {
 
       {screen === "denied" && (
         <section className="screen page denied" aria-label="Camera needed">
-          <img src="/kit/moth.svg" alt="" className="denied-moth" />
-          <p className="kicker">An interruption</p>
-          <h1 className="page-title">The camera is still asleep</h1>
-          <p className="lede">This book needs the camera to draw your portrait. Nothing is recorded until you press Begin.</p>
-          <ol className="howto">
-            <li><b>Chrome or Edge:</b> click the camera icon at the right end of the address bar, choose <i>Always allow</i>, then try again.</li>
-            <li><b>Safari:</b> Safari menu → Settings for This Website → Camera → <i>Allow</i>.</li>
-            <li><b>macOS:</b> System Settings → Privacy &amp; Security → Camera → turn on your browser.</li>
-          </ol>
-          <SealButton onClick={openBook}>Try again</SealButton>
+          <div className="panel denied-panel">
+            <img src="/kit/moth.svg" alt="" className="denied-moth" />
+            <p className="kicker">An interruption</p>
+            <h1 className="page-title">The camera is still asleep</h1>
+            <p className="lede">This book needs the camera to draw your portrait. Nothing is recorded until you press Begin.</p>
+            <ol className="howto">
+              <li><b>Chrome or Edge:</b> click the camera icon at the right end of the address bar, choose <i>Always allow</i>, then try again.</li>
+              <li><b>Safari:</b> Safari menu → Settings for This Website → Camera → <i>Allow</i>.</li>
+              <li><b>macOS:</b> System Settings → Privacy &amp; Security → Camera → turn on your browser.</li>
+            </ol>
+            <SealButton onClick={openBook}>Try again</SealButton>
+          </div>
         </section>
       )}
 
@@ -545,7 +556,7 @@ export default function Booth() {
             </div>
           </div>
 
-          <aside className="side">
+          <aside className="side panel">
             {screen === "frame" ? (
               <>
                 <fieldset className="choices">
@@ -616,7 +627,8 @@ export default function Booth() {
               </div>
             )}
           </div>
-          <div className="review-copy">
+          <Balloon className="review-balloon" />
+          <div className="review-copy panel">
             <p className="kicker">Chapter two · The proof</p>
             <h1 className="page-title">
               Is this your <em>tale?</em>
@@ -646,7 +658,7 @@ export default function Booth() {
             </div>
             <div className="caption" aria-live="polite">
               {ready && (
-                <>
+                <div className="panel caption-panel">
                   <p className="caption-text">
                     Scan to keep your story.
                     <br />
@@ -660,7 +672,7 @@ export default function Booth() {
                       Start a new story
                     </SealButton>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </div>
